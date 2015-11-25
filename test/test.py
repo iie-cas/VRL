@@ -5,7 +5,7 @@ import payloads
 from payloads import *
 import sys
 
-options={'dIP':"127.0.0.1", 'dPort':"", 'exploit':"exploit1", 'payload':"payload1"}
+options={'dIP':"127.0.0.1", 'dPort':"12345", 'exploit':"exploit3", 'payload':"payload1"}
 
 def show_exploits(args=[]):      #命令show参数对应的函数定义
     for item in exploits.__all__:
@@ -65,9 +65,12 @@ commands={'help':help, 'show':show, 'set':setup, 'reload':load, 'test':attack} #
 
 while True:
     command = raw_input('test >> ').split()
+    if len(command) == 0:
+        print "\tMissing command."
+        print "\tEnter 'help' for help."
     if command[0] in ['quit', 'q']:
         sys.exit()
-    if len(command) == 0 or command[0] not in commands:
+    if command[0] not in commands:
         print "\tInvalid command or args!"
         print "\tEnter 'help' for help."
         continue
