@@ -37,12 +37,12 @@ def help(args=[]):
     print "\ttest: 设置完参数后进行测试"
 def show(args=[]):
     if len(args)!=1 or args[0] not in shows:
-        print "\tInvalid args"
+        print "\tInvalid args!"
         return
     shows[args[0]]()
 def setup(args=[]):
     if len(args)!=2 or args[0] not in options:
-        print "\tInvalid args"
+        print "\tInvalid args!"
         return
     options[args[0]]=args[1]
 def load(args=[]):
@@ -66,13 +66,13 @@ commands={'help':help, 'show':show, 'set':setup, 'reload':load, 'test':attack} #
 while True:
     command = raw_input('test >> ').split()
     if len(command) == 0:
-        print "\tMissing command."
+        print "\tMissing command!"
         print "\tEnter 'help' for help."
         continue
     if command[0] in ['quit', 'q']:
         sys.exit()
     if command[0] not in commands:
-        print "\tInvalid command or args!"
+        print "\tInvalid command!"
         print "\tEnter 'help' for help."
         continue
     commands[command[0]](command[1:])
