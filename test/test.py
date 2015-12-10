@@ -1,11 +1,12 @@
-#coding:UTF-8
+#! /usr/bin/python
+#coding:utf-8
 import exploits
 from exploits import *
 import payloads
 from payloads import *
 import sys
 
-options={'dIP':"127.0.0.1", 'dPort':"12345", 'exploit':"exploit4", 'payload':"payload1"}
+options={'dIP':"127.0.0.1", 'dPort':"11111", 'exploit':"exploit6", 'payload':""}
 
 def show_exploits(args=[]):      #命令show参数对应的函数定义
     for item in exploits.__all__:

@@ -1,2 +1,0 @@
-vul1: vul1.cpp
-	g++ -z execstack vul1.cpp -o ../../vuls/vul1
