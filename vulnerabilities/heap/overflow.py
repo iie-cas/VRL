@@ -111,10 +111,8 @@ p.recvline() # ok
 p.recvline() # choice
 p.sendline('f')
 p.recvline() # free
-p.sendline('3')
+p.sendline('2')
 
-p.recvline()
-p.recvline()
 
 
 p.interactive()
