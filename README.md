@@ -1,5 +1,5 @@
 # VRL
-VRL(Vulnerability Research Lab) is aiming at summarizing exps of vulnerabilities of linux under different protection mechanisms.
+VRL(Vulnerability Research Lab) aims at summarizing exps of vulnerabilities of linux under different protection mechanisms.
 
 ## Platforms
 Ubuntu 12.04 (32 & 64 bits)    
