@@ -8,7 +8,7 @@ Kali 2.0 (64 bits)
 
 ## 项目规划
 - vulnerabilities: 存放不同类别的漏洞程序，其源码存放于 code 目录中
-- test: 存放漏洞利用测试框架，模仿 MetaSploit 的形式，可以不多扩展添加 exp
+- test: 存放漏洞利用测试框架，模仿 MetaSploit 的形式，可以不断扩展添加 exp
 - slides: 存放组会时分享的相关资料  
 
 ## 实验环境
