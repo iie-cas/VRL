@@ -2,12 +2,13 @@
 #coding:utf-8
 import sys
 from modules import *
-sys.path.append(r"exploits")
-ex=__import__('stack_overflow',globals(),locals(),['run'])
+#test
+#sys.path.append(r"exploits")
+#ex=__import__('stack_overflow',globals(),locals(),['run'])
 
-exp=ex.run.Exploit()
-exp.check()
-exp.run()
+#exp=ex.run.Exploit()
+#exp.check()
+#exp.run()
 #print ex.test.b
 
 
