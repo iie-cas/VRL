@@ -1,10 +1,13 @@
 #! /usr/bin/python
 #coding:utf-8
-import exploits
-from exploits import *
-import payloads
-from payloads import *
 import sys
+from modules import *
+sys.path.append(r"exploits")
+#ex=__import__('stack_overflow',globals(),locals(),['test'])
+
+#print ex.test.b
+
+
 
 options={'dIP':"127.0.0.1", 'dPort':"11111", 'exploit':"exploit6", 'payload':""}
 
@@ -35,7 +38,7 @@ def help(args=[]):
     print "\t    dPort: 设置目标端口"
     print "\t    exploit: 所选用的exploit模块"
     print "\t    payload: 所选用的payload模块"
-    print "\ttest: 设置完参数后进行测试"
+    print "\tui: 设置完参数后进行测试"
 def show(args=[]):
     if len(args)!=1 or args[0] not in shows:
         print "\tInvalid args!"
@@ -62,10 +65,10 @@ def attack(args=[]):
         print "ERROR:", e
         print "Please reset your options."
 
-commands={'help':help, 'show':show, 'set':setup, 'reload':load, 'test':attack} #所有命令
+commands={'help':help, 'show':show, 'set':setup, 'reload':load, 'ui':attack} #所有命令
 
 while True:
-    command = raw_input('test >> ').split()
+    command = raw_input('ui >> ').split()
     if len(command) == 0:
         print "\tMissing command!"
         print "\tEnter 'help' for help."
