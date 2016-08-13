@@ -44,6 +44,9 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
         #这一函数将被VRL启动以调用你的程序，确保你开启的时候按照options的参数
         print 'run your vulnerability here'
         
+    def stop(self):
+        #这一函数用于停止你的程序，如果你的程序无法，或不需要停止，可以没有这一函数
+
     def make(self):
         #重新编译你的程序，暂时没有这一功能
         
