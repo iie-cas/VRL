@@ -1,15 +1,18 @@
 # VRL
+**Under Refacting**
 
 VRL(Vulnerability Research Lab)的研究目的在于，在 Linux 平台下测试并验证已有漏洞，分析开启不同防御机制的情况下对攻击过程的影响，学习和熟悉漏洞利用原理与技巧，尝试研究出新的攻击或防御方法。
 
 ## 测试平台
-Ubuntu 12.04 LTS (32 bits)    
-Kali 2.0 (64 bits) 
+Ubuntu 16.04 LTS (64 bits)    
 
 ## 项目规划
-- vulnerabilities: 存放不同类别的漏洞程序，其源码存放于 code 目录中
-- test: 存放漏洞利用测试框架，模仿 MetaSploit 的形式，可以不断扩展添加 exp
+- vulnerabilities: 存放不同类别的漏洞程序
+- exploits: 存放不同的攻击程序
+- payloads: 存放不同的payload
+- modules: 存放相关的模块
 - slides: 存放组会时分享的相关资料  
+- documents: 平台文档
 
 ## 实验环境
 漏洞程序主要使用 C 或 C++ 编写，对应 exp 脚本主要使用 Python 2.7 编写。   
