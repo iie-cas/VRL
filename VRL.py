@@ -2,15 +2,15 @@
 #coding:utf-8
 import sys
 import os
-import cmd
-
+#import cmd
+import cmd2
 
 from modules import *
 import vulnerabilities
 import exploits
 
 
-class ui(cmd.Cmd):
+class ui(cmd2.Cmd):
     prompt = '(VRL)'
     intro = 'Welcome to VRL'
     global exp,vul,exploit_list,vulnerability_list
@@ -32,8 +32,8 @@ class ui(cmd.Cmd):
                         if type=='vulnerabilities': vulnerability_list.append(str(name))
 
     def do_show(self,type):
-        '''Show all exploits|vulnerabilities|payload
-        format: list exploit|vulnerabilities|payload (e|v|p for short.)'''
+        '''Show all exploits|vulnerabilities|payload|options
+        format: list exploit|vulnerabilities|payload|options (e|v|p|o for short.)'''
         if type:
             path={'e':exploit_list, 'v':vulnerability_list}#,'p':payload}
             if type[0] in path.keys():
@@ -98,7 +98,7 @@ class ui(cmd.Cmd):
     def do_runexp(self,line):
         '''Run the exploit using'''
         if exp:
-            exp.stop()
+            exp.run()
         else:
             print 'Error: No exploit using.'
 
@@ -122,9 +122,15 @@ class ui(cmd.Cmd):
         else:
             print 'Error: No exploit using.'
 
-    def do_qrun(self,name):
+    def do_stop(self,line):
+        '''Stop vulnerability and exploit.'''
+        self.do_stopexp(line)
+        self.do_stopvul(line)
+
+    def do_run(self,name):
         '''Quick run a vulnerability and it's default exploit with default options
         format: qrun []'''
+        print 'Quick running...'
         if not vul and not exp:
             if not name:
                 print "No vulnerability or exploit using, enter a name to quick run."
@@ -133,13 +139,56 @@ class ui(cmd.Cmd):
         self.do_runvul('')
         self.do_runexp('')
 
+    def do_set(self,args):
+        '''This command will automatically find the option of vulnerability or exploit.
+        format: set key value
+        Mention: When the vulnerability and exploit share same keys, they will change together.
+                 if you want to only change one of them, use 'setvul'/'setexp' command.'''
+        [key,value] = args.split(' ')[0:2]
+        suc = False         # found or not
+        if vul:
+            for (k,_) in vul.options.items():
+                if k == key:
+                    vul.options[k] = value
+                    print "Vulnerability options updated."
+                    suc = True
+        if exp:
+            for (k,_) in exp.options.items():
+                if k == key:
+                    exp.options[k] = value
+                    print "Exploit options updated."
+                    suc = True
+        if not suc:
+            print "Error: no such key found."
+
+    def do_setvul(self,args):
+        [key,value] = args.split(' ')[0:2]
+        suc = False         # found or not
+        if vul:
+            for (k,_) in vul.options.items():
+                if k == key:
+                    vul.options[k] = value
+                    print "Vulnerability options updated."
+                    suc = True
+        if not suc:
+            print "Error: no such key found."
+
+    def do_setexp(self,args):
+        [key,value] = args.split(' ')[0:2]
+        suc = False         # found or not
+        if exp:
+            for (k,_) in exp.options.items():
+                if k == key:
+                    exp.options[k] = value
+                    print "Exploit options updated."
+                    suc = True
+        if not suc:
+            print "Error: no such key found."
+
     def do_q(self,line):
         '''Quit VRL.'''
-        self.do_EOF(line)
-
-    def do_EOF(self,line):
-        '''Quit VRL'''
         return True
+
 
 #list of exp & vul
 exploit_list=[]
