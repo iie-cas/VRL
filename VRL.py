@@ -31,6 +31,22 @@ class ui(cmd2.Cmd):
                         if type=='exploits': exploit_list.append(str(name))
                         if type=='vulnerabilities': vulnerability_list.append(str(name))
 
+    def do_guide(self,line):
+        print '''
+        Simple guide:
+        help command or ?[command] for help.
+        show command for list vulnerabilities and exploits.
+        use command for load vulnerabilities and exploits.
+        run command for run vulnerabilities and exploits.
+        For more commands, use help command to list all, or read the document.
+        Following command is related to the VRL:
+        reload | guide | show
+        usevul | useexp
+        run | runvul |runexp
+        stop | stopvul |stopexp
+        set | setvul | setexp
+        '''
+
     def do_show(self,type):
         '''Show all exploits|vulnerabilities|payload|options
         format: list exploit|vulnerabilities|payload|options (e|v|p|o for short.)'''
