@@ -3,45 +3,53 @@
 import sys
 import os
 from modules import *
+import vulnerabilities
+import exploits
 import cmd
-'''
-#test
-#sys.path.append(r"exploits")
-#ex=__import__('stack_overflow',globals(),locals(),['run'])
-
-#exp=ex.run.Exploit()
-#exp.check()
-#exp.run()
-#print ex.test.b
-'''
 
 
 class ui(cmd.Cmd):
     prompt = '(VRL)'
     intro = 'Welcome to VRL'
-    global exp,vul,exploits,vulnerabilities
+    global exp,vul,exploit_list,vulnerability_list
 
     def do_reload(self,line):
         '''Reload all exploits,vulnerabilities,payloads,etc.
         When VRL started, loading is done.
         So you only need to use this when you add something new and do not want to restart VRL.'''
+        global exploit_list
+        global vulnerability_list
+        exploit_list=[]
+        vulnerability_list=[]
         for type in ['exploits','vulnerabilities']:
             subpath=os.path.join(os.curdir,type)
             for name in os.listdir(subpath):
                 if os.path.isdir(os.path.join(subpath,name)):
                     if 'run.py' in os.listdir(os.path.join(subpath,name)):
-                        if type=='exploits': exploits.append(str(name))
-                        if type=='vulnerabilities': vulnerabilities.append(str(name))
+                        if type=='exploits': exploit_list.append(str(name))
+                        if type=='vulnerabilities': vulnerability_list.append(str(name))
 
 
     def do_show(self,type):
         '''Show all exploits|vulnerabilities|payload
         format: list exploit|vulnerabilities|payload (e|v|p for short.)'''
         if type:
-            path={'e':exploits,'v':vulnerabilities}#,'p':payload}
+            path={'e':exploit_list, 'v':vulnerability_list}#,'p':payload}
             if type[0] in path.keys():
                 for i in path[type[0]]:
                     print i
+            elif type[0] == 'o':     #for options
+                if vul or exp:
+                    if vul:
+                        print "Vulnerability options:"
+                        print vul.options
+                    if exp:
+                        print "Exploit options:"
+                        print exp.options
+                else:
+                    print 'Error: No vulnerability or exploit using.'
+            else:
+                print "Error: Invade argument."
         else:
             print "Wrong format!"
 
@@ -50,10 +58,9 @@ class ui(cmd.Cmd):
         format: usevul vulnerability_name'''
         global vul
         try:
-            sys.path.append(os.path.join(os.curdir,'vulnerabilities'))
-            temp=__import__(name+'.run')
-            vul=temp.run.Vulnerability()
-            sys.path.remove(os.path.join(os.curdir,'vulnerabilities'))
+            _temp=__import__('vulnerabilities.'+name+'.run',globals(),locals(),fromlist=['Vulnerability'])
+            Vulnerability = _temp.Vulnerability
+            vul=Vulnerability()
         except Exception,e:
             print e
 
@@ -61,10 +68,12 @@ class ui(cmd.Cmd):
         '''Use an exploit
         format: useexp exploit_name'''
         global exp
-        sys.path.append(os.path.join(os.curdir,'exploits'))
-        temp=__import__(name+'.run')
-        exp=temp.run.Exploit()
-        sys.path.remove(os.path.join(os.curdir,'exploits'))
+        try:
+            _temp=__import__('exploits.'+name+'.run',globals(),locals(),fromlist=['Exploit'])
+            Exploit= _temp.Exploit
+            exp=Exploit()
+        except Exception,e:
+            print e
 
     def do_runvul(self,line):
         '''Run the vulnerability using'''
@@ -87,8 +96,8 @@ class ui(cmd.Cmd):
         return True
 
 #list of exp & vul
-exploits=[]
-vulnerabilities=[]
+exploit_list=[]
+vulnerability_list=[]
 #exp & vul using
 exp=[]
 vul=[]
