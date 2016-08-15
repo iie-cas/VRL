@@ -1,5 +1,6 @@
 #! /usr/bin/python
 #coding:utf-8
+import os
 from modules import vulnerability
 
 class Vulnerability(vulnerability.VRL_Vulnerability):
@@ -18,6 +19,8 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
 
 '''Bellowing is default, simply ignore it.'''
 if __name__ == "__main__":
+    if '__init__.py' not in os.listdir(os.curdir):
+        os.mknod('__init__.py')
     vul = Vulnerability()
     print 'Vulnerability: ',vul.name,' \n'
     print 'Checking:\n'
