@@ -32,6 +32,7 @@ class ui(cmd2.Cmd):
                         if type=='vulnerabilities': vulnerability_list.append(str(name))
 
     def do_guide(self,line):
+        '''Show a simple guide.'''
         print '''
         Simple guide:
         help command or ?[command] for help.
@@ -104,6 +105,22 @@ class ui(cmd2.Cmd):
         except Exception,e:
             print e
 
+    def do_use(self,name):
+        '''Load the vulnerability and exploit with same name.
+        format: use name
+        Notice: use exp/e ... equals useexp ...
+                use vul/v ... equals usevul ...'''
+        [arg,name_] = name.split()[0:2]
+        if arg in ['exp','e','vul','v']:
+            if arg in ['exp','e']:
+                self.do_useexp(name_)
+            else:
+                self.do_usevul(name_)
+            return
+
+        self.do_usevul(name)
+        self.do_useexp(name)
+
     def do_runvul(self,line):
         '''Run the vulnerability using'''
         if vul:
@@ -139,13 +156,29 @@ class ui(cmd2.Cmd):
             print 'Error: No exploit using.'
 
     def do_stop(self,line):
-        '''Stop vulnerability and exploit.'''
+        '''Stop both vulnerability and exploit.
+        Notice: stop exp/e equals stopexp
+                stop vul/v equals stopvul'''
+        if line in ['exp','e','vul','v']:
+            if line in ['exp','e']:
+                self.do_stopexp('')
+            else:
+                self.do_stopvul('')
+            return
         self.do_stopexp(line)
         self.do_stopvul(line)
 
     def do_run(self,name):
         '''Quick run a vulnerability and it's default exploit with default options
-        format: qrun []'''
+        format: run []
+        Metion: run exp/e equals runexp
+                run vul/v equals runvul'''
+        if name in ['exp','vul','e','v']:
+            if name in ['exp','e']:
+                self.do_runexp('')
+            else:
+                self.do_runvul('')
+            return
         print 'Quick running...'
         if not vul and not exp:
             if not name:
@@ -158,7 +191,7 @@ class ui(cmd2.Cmd):
     def do_set(self,args):
         '''This command will automatically find the option of vulnerability or exploit.
         format: set key value
-        Mention: When the vulnerability and exploit share same keys, they will change together.
+        Notice: When the vulnerability and exploit share same keys, they will change together.
                  if you want to only change one of them, use 'setvul'/'setexp' command.'''
         [key,value] = args.split(' ')[0:2]
         suc = False         # found or not
@@ -178,6 +211,7 @@ class ui(cmd2.Cmd):
             print "Error: no such key found."
 
     def do_setvul(self,args):
+        '''See help set.'''
         [key,value] = args.split(' ')[0:2]
         suc = False         # found or not
         if vul:
@@ -190,6 +224,7 @@ class ui(cmd2.Cmd):
             print "Error: no such key found."
 
     def do_setexp(self,args):
+        '''See help set.'''
         [key,value] = args.split(' ')[0:2]
         suc = False         # found or not
         if exp:
