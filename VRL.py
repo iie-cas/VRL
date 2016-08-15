@@ -2,15 +2,17 @@
 #coding:utf-8
 import sys
 import os
-#import cmd
-import cmd2
+try:
+    import cmd2 as cmd
+except ImportError:
+    import cmd
 
 from modules import *
 import vulnerabilities
 import exploits
 
 
-class ui(cmd2.Cmd):
+class ui(cmd.Cmd):
     prompt = '(VRL)'
     intro = 'Welcome to VRL'
     global exp,vul,exploit_list,vulnerability_list
