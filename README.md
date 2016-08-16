@@ -130,3 +130,15 @@ if __name__ == "__main__":
 ```
 
 另外，如果你的Exploit支持更换payload，可以在属性中添加payload属性，默认值为默认的字节流。
+
+---
+
+## 待开发的功能：
+
++ payload替换（支持多个分块）
++ payload加工
++ ROP/JOP构建
++ autoattach/autoDEBUG
++ 脚本名自动补全
++ make
++ info
