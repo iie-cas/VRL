@@ -1,7 +1,7 @@
 #! /usr/bin/python
 #coding:utf-8
 
-#import sys
+import sys
 import os
 try:
     import cmd2 as cmd
@@ -83,12 +83,13 @@ class ui(cmd.Cmd):
     def do_usevul(self,name):
         '''Use a vulnerability
         format: usevul vulnerability_name'''
-        global vul
+        global vul,vulpath
         try:
             _temp=__import__('vulnerabilities.'+name+'.run',globals(),locals(),fromlist=['Vulnerability'])
             Vulnerability = _temp.Vulnerability
             vul=Vulnerability()
             print 'Vulnerability Loaded'
+            vulpath=os.path.join(sys.path[0],'vulnerabilities',name)
             if hasattr(vul,'exploit') and not exp:
                 c = raw_input("This vulnerability has a default exploit, use the exploit?(y/n):(y)")
                 if not c or c[0] != 'n':
@@ -99,12 +100,13 @@ class ui(cmd.Cmd):
     def do_useexp(self,name):
         '''Use an exploit
         format: useexp exploit_name'''
-        global exp
+        global exp,exppath
         try:
             _temp=__import__('exploits.'+name+'.run',globals(),locals(),fromlist=['Exploit'])
             Exploit= _temp.Exploit
             exp=Exploit()
             print 'Exploit Loaded'
+            exppath=os.path.join(sys.path[0],'exploits',name)
             if hasattr(exp,'vulnerability') and not vul:
                 c = raw_input("This exploit has a default vulnerability, use the exploit?(y/n):(y)")
                 if not c or c[0] != 'n':
@@ -162,14 +164,18 @@ class ui(cmd.Cmd):
     def do_runvul(self,line):
         '''Run the vulnerability using'''
         if vul:
+            sys.path.append(vulpath)
             vul.run()
+            sys.path.remove(vulpath)
         else:
             print 'Error: No vulnerability using.'
 
     def do_runexp(self,line):
         '''Run the exploit using'''
         if exp:
+            sys.path.append(exppath)
             exp.run()
+            sys.path.remove(exppath)
         else:
             print 'Error: No exploit using.'
 
@@ -353,6 +359,10 @@ payload_list= []
 exp=[]
 vul=[]
 pay=''
+#path
+exppath=sys.path[0]
+vulpath=sys.path[0]
+
 
 VRLui=ui()
 
