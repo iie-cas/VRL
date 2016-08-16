@@ -107,12 +107,14 @@ if __name__ == "__main__":
 ```    
 
 漏洞程序的属性(__init__中)如下：
+
 + name：字符串，脚本名称，建议与文件夹名一致。
 + info：脚本的简单信息。
 + options：必须（可以为空）。能够影响脚本运行的可设置选项和默认值。**注意：所有选项请统一为str类型，包括key和value**
 + exploit：默认的exploit脚本名称（以路径名为准，而非name属性）。
 
 漏洞程序的方法如下：
+
 + run：必须。这一函数将被VRL启动以调用你的程序，确保以当前设置运行。
 + stop：非必须。用于终止你的程序。
 + make：非必须。用于重新编译。（暂时不会有这一功能）
@@ -130,3 +132,15 @@ if __name__ == "__main__":
 ```
 
 另外，如果你的Exploit支持更换payload，可以在属性中添加payload属性，默认值为默认的字节流。
+
+---
+
+## 待开发的功能：
+
++ payload替换 finish
++ payload加工
++ ROP/JOP构建
++ autoattach/autoDEBUG
++ 脚本名自动补全
++ make finish
++ info finish
