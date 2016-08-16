@@ -8,6 +8,10 @@ Ubuntu 16.04 LTS (64 bits)
 ## 实验环境
 漏洞程序主要使用 C 或 C++ 编写，对应 exp 脚本主要使用 Python 2.7 编写。   
 
+建议安装的Python库：
+
+- [cmd2](https://pythonhosted.org/cmd2/)
+
 可能会用到的 Python 第三方库有:   
 
 - [pwntools](https://github.com/Gallopsled/pwntools)
@@ -42,44 +46,60 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
     + `show option` 或`show o` 显示所有选项（包括Exploit和Vulnerability）。
     + `set key value` 将改变key为value。这里`value`将作为字符串赋值，在脚本中注意这一属性。这里设计上认为Exploit和Vulnerability中相同名称的key应该保持相同值。在脚本中注意这一设计。
     + 不希望同时被更改option可以使用`setexp key value`和`setvul key value`，（更建议在设计时使用不同的属性名称）。
-    
+
++ 选择payload：
+    + `usepay payname`选择payload，在这之前要确定你使用的Exploit支持更换Payload。
+    + 这一命令将列出Exploit对于Payload的要求和当前Payload的信息供对比，询问是否使用。所以你并不需要单独的命令查看payload信息，如果不符合，就输入`n`放弃。
+        + 目前仅支持一个Exploit中只包含一个Payload块，多个Payload连用使用工具连接，但分离的多个Payload并不支持。因为暂时没有遇到需要的情况。
+
 + 运行Exploit或Vulnerability（使用当前设置）：
     + `runexp` 或`run e` `run exp`
     + `runvul` 或`run v` `run vul`
     + `run` 将先运行Vulnerability，再运行Exploit。
         + *Tip: 如果Vulnerability指定了默认的Exploit，可以使用`run vulname`来快速运行，甚至不需要use载入。*
 
-+ 停止Exploit或Vulnerability（使用当前设置）：
++ 停止Exploit或Vulnerability：
     + 这一功能需要脚本中有stop()函数，用于在终止在后台运行的脚本。如果不需要，可以没有这一函数。
     + `stopexp` 或`stop e` `stop exp`
     + `stopvul` 或`stop v` `stop vul`
     + `stop` 将终止Exploit和Vulnerability。
+
++ 显示Exploit和Vulnerability信息：
+    + `info` 系列指令与`stop`结构完全相同，显示脚本内info属性中记录的文字。
+    + 显示payload信息参见选择payload。
     
++ 重新编译Exploit和Vulnerability：
+    + `make` 系列指令与`stop`结构完全相同，将调用脚本内的make方法。如果不需要，可以没有这一函数。
+
 + 其他
     + `help`将列出所用命令，`help command`或`?command`将给出帮助。
     + `q`退出VRL
-    + 如果你安装了cmd2包，将优先使用cmd2，这将带来如下便利：
+    + `gdb`将调出GDB，这将不会像使用`!gdb`这样让当前终端陷入GDB。
+    + 命令不区分大小写，但脚本名区分。
+    + 强烈建议安装cmd2，如果你安装了cmd2包，将优先使用cmd2，这将带来如下便利：
+        + 可以方便地使用脚本，bash命令和python命令。
         + 异常将不会导致退出VRL。
-        + 一些默认的函数，例如`!command`执行bash指令等。
+        + 一些默认的函数，例如`exit`, `!command`执行bash指令等。
 
 
 ## 扩展方法
 
 ### 增加Vulnerability
-增加新的漏洞程序需要在vulnerability文件夹中新建一个文件夹，以漏洞程序名命名，文件包括：
+增加新的漏洞程序需要在vulnerability文件夹中新建一个文件夹，以漏洞程序名命名，文件夹中包括：
  
 - `__init__.py` ： python package标识，你可以忽略这个文件，至少运行一次模板run.py将会自动生成这一文件。
 - `run.py` ： 与平台交互的脚本，详见下面说明。
-- 可执行文件（可选）：漏洞程序，如果你可以在run.py中完成漏洞程序，则不需要。
-- 源码（可选）： 如果你希望你的漏洞程序可以跨平台，那么需要源码，否则不需要(可见的预期内并不会跨平台)。
+- 可执行文件（可选）：漏洞程序，如果你可以仅在run.py中完成漏洞程序，则不需要。
+- 源码（可选）： 如果你希望你的漏洞程序可以跨平台，那么需要源码供make编译，否则不需要(可见的预期内并不会跨平台)。
 - 说明文档（可选）： 说明这一漏洞程序原理的文档。
 
 **注意：VRL平台只与你的run.py脚本交互**
+**你需要在当前`vulnerability\vulname`路径下直接运行run.py成功，_不要改动_class定义以外的内容。如果你的脚本单独能成功而在VRL中使用失败，请联系我。**
 
 一个简单的run.py如下：
 
 ```python
-import..
+import...
 
 class Vulnerability(vulnerability.VRL_Vulnerability):
     def __init__(self):
@@ -98,7 +118,7 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
         #这一函数用于停止你的程序，如果你的程序无法，或不需要停止，可以没有这一函数
 
     def make(self):
-        #重新编译你的程序，暂时没有这一功能
+        #重新编译你的程序
         
 #这里默认检查你的脚本并以默认参数运行你的程序，无需更改
 #这使得如果run.py运行通过了，就可以在VRL中使用了。
@@ -107,15 +127,49 @@ if __name__ == "__main__":
 ```    
 
 漏洞程序的属性(__init__中)如下：
+
 + name：字符串，脚本名称，建议与文件夹名一致。
 + info：脚本的简单信息。
 + options：必须（可以为空）。能够影响脚本运行的可设置选项和默认值。**注意：所有选项请统一为str类型，包括key和value**
 + exploit：默认的exploit脚本名称（以路径名为准，而非name属性）。
 
 漏洞程序的方法如下：
+
 + run：必须。这一函数将被VRL启动以调用你的程序，确保以当前设置运行。
 + stop：非必须。用于终止你的程序。
-+ make：非必须。用于重新编译。（暂时不会有这一功能）
++ make：非必须。用于重新编译。
+
+#### 注意事项
+
+你的run方法会被VRL直接调用，所以你的程序必须短时间内结束，目标程序在后台执行。
+换句话说，这意味着如果你的程序需要命令行交互，你就必须在新的终端执行这一交互，否则VRL将陷入你的交互中。
+
+例如：
+run方法启动了一个server程序，这一server程序需要一直执行，等待链接并打印出当前状态。因此命令行被这一程序独占。
+这时你的VRL将无法操作：
+```bash
+(VRL)run vul
+server start... 
+waiting for client...
+                <--VRL命令行消失，因为这时vul的执行过程。
+```
+你当然可以再重新开启一个VRL运行Exploit，但这不是我们希望的交互方式。解决方法如下：
+
+当调用系统指令时，将命令command用VRL中moudules.tools中的函数加工为在新的终端调用。
+`command`->`new_terminal(command)`或`new_terminal_exit(command)`
+例如：
+```python
+os.popen('./vul').readlines() 或
+os.system('./vul')
+```
+更改为：
+```python
+os.popen(new_terminal('./vul')).readlines() 或
+os.system(new_terminal('./vul'))
+```
+`new_terminal`与`new_terminal_exit`不同在于后者将在程序运行后关闭终端，而前者留在终端。
+
+**当然，这一方法只适用于调用Bash时。**
 
 ### 增加Exploit
 
@@ -127,18 +181,61 @@ if __name__ == "__main__":
 
 - class Vulnerability(vulnerability.VRL_Vulnerability):
 + class Exploit(exploit.VRL_Exploit):
+
+  def __init__(self):
++     self.payload = '\0xAA...'
++     self.payload_info = 'Information of the requirements of payload.'
+
+
 ```
 
-另外，如果你的Exploit支持更换payload，可以在属性中添加payload属性，默认值为默认的字节流。
++ 如果你的Exploit支持更换payload，可以在属性中添加payload属性，默认值为默认的字节流。
++ payload_info中记录的信息将会在更换payload时显示，供使用者比较payload是否可用。建议包含的信息：
+    + 最大payload长度
+    + 是否限制NULL(\00)字节
+    + 是否需要Unicode编码
+    + 是否需要ROP或JOP构造
+    + 等等
+
+### 增加Payload
+
+与增加前两者不同，增加payload直接在payloads中添加python脚本。一个简单的payload脚本如下：
+
+```pytho
+#coding:UTF-8
+
+shellcode = "\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73"
+shellcode += "\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0"
+shellcode += "\x0b\xcd\x80"
+
+class Payload(object):
+	def __init__(self):
+		self.info = 'Information of the Payload.'
+		self.data = shellcode
+
+if __name__=='__main__':
+    ...
+```
+
+Payload类中只有两个必须的属性：
+
++ info：记录payload的信息，供使用时参考。建议包含的信息：
+    + payload长度
+    + 是否有NULL(\00)字节
+    + 是否可以Unicode编码
+    + 是否为ROP或JOP构造
+    + 等等
++ data：payload字节流本身。
+
+**同样地，你_不需要_更改class以外的部分，直接运行这个脚本就检查两个属性是否存在。然后打印info属性。这就意味着这个脚本可以使用了。**
 
 ---
 
 ## 待开发的功能：
 
-+ payload替换 finish
++ Exploit脚本中以payload name载入
 + payload加工
 + ROP/JOP构建
-+ autoattach/autoDEBUG
++ auto attach/autoDEBUG
 + 脚本名自动补全
-+ make finish
-+ info finish
+
