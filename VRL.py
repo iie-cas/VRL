@@ -1,30 +1,30 @@
 #! /usr/bin/python
 #coding:utf-8
-import sys
+
+#import sys
 import os
 try:
     import cmd2 as cmd
 except ImportError:
     import cmd
 
-from modules import *
-import vulnerabilities
-import exploits
+#from modules import *
+#import vulnerabilities
+#import exploits
 
 
 class ui(cmd.Cmd):
     prompt = '(VRL)'
     intro = 'Welcome to VRL'
-    global exp,vul,exploit_list,vulnerability_list
 
     def do_reload(self,line):
         '''Reload all exploits,vulnerabilities,payloads,etc.
         When VRL started, loading is done.
         So you only need to use this when you add something new and do not want to restart VRL.'''
-        global exploit_list
-        global vulnerability_list
+        global exploit_list, vulnerability_list, payload_list
         exploit_list=[]
         vulnerability_list=[]
+        payload_list=[]
         for type in ['exploits','vulnerabilities']:
             subpath=os.path.join(os.curdir,type)
             for name in os.listdir(subpath):
@@ -32,6 +32,11 @@ class ui(cmd.Cmd):
                     if 'run.py' in os.listdir(os.path.join(subpath,name)):
                         if type=='exploits': exploit_list.append(str(name))
                         if type=='vulnerabilities': vulnerability_list.append(str(name))
+        for i in os.listdir(os.path.join(os.curdir,'payloads')):
+            [a,b]=os.path.splitext(str(i))
+            if b == '.py':
+                if a != '__init__':
+                    payload_list.append(a)
 
     def do_guide(self,line):
         '''Show a simple guide.'''
@@ -54,7 +59,7 @@ class ui(cmd.Cmd):
         '''Show all exploits|vulnerabilities|payload|options
         format: list exploit|vulnerabilities|payload|options (e|v|p|o for short.)'''
         if type:
-            path={'e':exploit_list, 'v':vulnerability_list}#,'p':payload}
+            path={'e':exploit_list, 'v':vulnerability_list,'p':payload_list}
             if type[0] in path.keys():
                 for i in path[type[0]]:
                     print i
@@ -107,15 +112,46 @@ class ui(cmd.Cmd):
         except Exception,e:
             print e
 
+    def do_usepay(self,name):
+        '''Use a payload
+        format: usepay payload_name'''
+        global pay
+        #check
+        if not exp:
+            print 'Error: You should use an exploit before use a payload.'
+            return
+        else:
+            if not hasattr(exp,'payload'):
+                print 'Error: Current exploit does not support change payload.'
+                return
+        #load payload
+        try:
+            _temp = __import__('payloads.'+name,globals(),locals(),fromlist=['Payload'])
+            Payload =  _temp.Payload
+            pay = Payload()
+            print 'Payload Loaded.'
+            if hasattr(exp,'payload_info'):
+                print 'Payload requirements of the exploit:\n',exp.payload_info
+
+            c = raw_input("Payload info:\n"+pay.info+"\nAre you sure to use the payload?(y/n):(y)")
+            if not c or c[0] != 'n':
+                exp.payload = pay.data
+        except Exception,e:
+            print e
+
+
+
     def do_use(self,name):
         '''Load the vulnerability and exploit with same name.
         format: use name
         Notice: use exp/e ... equals useexp ...
                 use vul/v ... equals usevul ...'''
         [arg,name_] = name.split()[0:2]
-        if arg in ['exp','e','vul','v']:
+        if arg in ['exp','e','vul','v', 'p','pay']:
             if arg in ['exp','e']:
                 self.do_useexp(name_)
+            elif arg in ['p','pay','payload']:
+                self.do_usepay(name_)
             else:
                 self.do_usevul(name_)
             return
@@ -243,14 +279,22 @@ class ui(cmd.Cmd):
         return True
 
 
-#list of exp & vul
+#list of exp & vul & payload
 exploit_list=[]
 vulnerability_list=[]
-#exp & vul using
+payload_list= []
+#exp & vul & payload using
 exp=[]
 vul=[]
+pay=''
 
 VRLui=ui()
+
+#delete unused command (make command list clear)
+for attr in ['do_exit','do_list','do_r','do_cmdenvironment','do_history','do_hi','do_save',
+             'do_pause','do_ed','do_edit','do_EOF','do_eof','do_li','do_l','do_quit']:
+    if hasattr(cmd.Cmd,attr): delattr(cmd.Cmd,attr)
+
 VRLui.do_reload('')
 VRLui.cmdloop()
 
