@@ -164,6 +164,7 @@ class ui(cmd.Cmd):
     def do_runvul(self,line):
         '''Run the vulnerability using'''
         if vul:
+            os.chdir(vulpath)
             sys.path.append(vulpath)
             vul.run()
             sys.path.remove(vulpath)
@@ -173,6 +174,7 @@ class ui(cmd.Cmd):
     def do_runexp(self,line):
         '''Run the exploit using'''
         if exp:
+            os.chdir(vulpath)
             sys.path.append(exppath)
             exp.run()
             sys.path.remove(exppath)
