@@ -346,6 +346,10 @@ class ui(cmd.Cmd):
         if not suc:
             print "Error: no such key found."
 
+    def do_gdb(self,args):
+        '''Open an gdb in a new terminal.(Use '!gdb' will fall into it.)'''
+        os.system("gnome-terminal -e gdb")
+
     def do_q(self,line):
         '''Quit VRL.'''
         return True
