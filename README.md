@@ -135,10 +135,10 @@ if __name__ == "__main__":
 
 ## 待开发的功能：
 
-+ payload替换（支持多个分块）
++ payload替换 finish
 + payload加工
 + ROP/JOP构建
 + autoattach/autoDEBUG
 + 脚本名自动补全
-+ make
-+ info
++ make finish
++ info finish

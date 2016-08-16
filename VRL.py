@@ -139,25 +139,25 @@ class ui(cmd.Cmd):
         except Exception,e:
             print e
 
-
-
     def do_use(self,name):
         '''Load the vulnerability and exploit with same name.
         format: use name
         Notice: use exp/e ... equals useexp ...
                 use vul/v ... equals usevul ...'''
-        [arg,name_] = name.split()[0:2]
-        if arg in ['exp','e','vul','v', 'p','pay']:
-            if arg in ['exp','e']:
-                self.do_useexp(name_)
-            elif arg in ['p','pay','payload']:
-                self.do_usepay(name_)
-            else:
-                self.do_usevul(name_)
-            return
+        if len(name.split()) == 2:
+            [arg,name_] = name.split()[0:2]
+            if arg in ['exp','e','vul','v', 'p','pay']:
+                if arg in ['exp','e']:
+                    self.do_useexp(name_)
+                elif arg in ['p','pay','payload']:
+                    self.do_usepay(name_)
+                else:
+                    self.do_usevul(name_)
+                return
 
         self.do_usevul(name)
-        self.do_useexp(name)
+        if not exp:
+            self.do_useexp(name)
 
     def do_runvul(self,line):
         '''Run the vulnerability using'''
@@ -205,6 +205,72 @@ class ui(cmd.Cmd):
             return
         self.do_stopexp(line)
         self.do_stopvul(line)
+
+    def do_makevul(self,line):
+        '''Recompile the vulnerability using'''
+        if vul:
+            if hasattr(vul,'make'):
+                vul.make()
+            else:
+                print 'Error: This vulnerability cannot make.'
+        else:
+            print 'Error: No vulnerability using.'
+
+    def do_makeexp(self,line):
+        '''Recompile the exploit using'''
+        if exp:
+            if hasattr(exp,'make'):
+                exp.make()
+            else:
+                print 'Error: This exploit cannot make.'
+        else:
+            print 'Error: No exploit using.'
+
+    def do_make(self,line):
+        '''Recompile both vulnerability and exploit.
+        Notice: make exp/e equals makeexp
+                make vul/v equals makevul'''
+        if line in ['exp','e','vul','v']:
+            if line in ['exp','e']:
+                self.do_makeexp('')
+            else:
+                self.do_makevul('')
+            return
+        self.do_makeexp(line)
+        self.do_makevul(line)
+
+    def do_infovul(self,line):
+        '''Show the information of current Vulnerability.'''
+        if vul:
+            if hasattr(vul,'info'):
+                print vul.info
+            else:
+                print 'Error: This vulnerability has no info.'
+        else:
+            print 'Error: No vulnerability using.'
+
+    def do_infoexp(self,line):
+        '''Show the information of current Exploit.'''
+        if exp:
+            if hasattr(exp,'info'):
+                print exp.info
+            else:
+                print 'Error: This exploit has no info.'
+        else:
+            print 'Error: No exploit using.'
+
+    def do_info(self,line):
+        '''Show information of both vulnerability and exploit.
+        Notice: info exp/e equals infoexp
+                info vul/v equals infovul'''
+        if line in ['exp','e','vul','v']:
+            if line in ['exp','e']:
+                self.do_infoexp('')
+            else:
+                self.do_infovul('')
+            return
+        self.do_infoexp(line)
+        self.do_infovul(line)
 
     def do_run(self,name):
         '''Quick run a vulnerability and it's default exploit with default options
