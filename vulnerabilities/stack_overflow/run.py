@@ -1,6 +1,7 @@
 #! /usr/bin/python
 #coding:utf-8
 from modules import vulnerability
+from modules.tools import *
 
 import os
 class Vulnerability(vulnerability.VRL_Vulnerability):
@@ -14,7 +15,8 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
     def run(self):
         '''Run your vulnerability here, if this script could success, the VRL can run it.
         When the vulnerability run, follow the options.'''
-        p = os.popen('gnome-terminal -e \'./ggtest '+ self.options['dPort']+"'",'r')
+        p = os.popen(new_terminal('./ggtest '+self.options['dPort']),'r')
+        #p = os.popen('gnome-terminal -e \'./ggtest '+ self.options['dPort']+"'",'r')
         print p.read()
 
 '''Bellowing is default, simply ignore it.'''
