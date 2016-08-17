@@ -10,7 +10,7 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
     def __init__(self):
         '''Add information of your vulnerability here'''
         self.name = 'stack_overflow'
-        self.info = 'information'
+        self.info = 'A simple server with stack overflow vulnerability.'
         self.options={'dPort' : '34566'}
         self.exploit = 'stack_overflow'
 
@@ -23,6 +23,8 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
 
 '''Bellowing is default, simply ignore it.'''
 if __name__ == "__main__":
+    if '__init__.py' not in os.listdir(os.curdir):
+        os.mknod('__init__.py')
     vul = Vulnerability()
     print 'Vulnerability: ',vul.name,' \n'
     print 'Checking:\n'
