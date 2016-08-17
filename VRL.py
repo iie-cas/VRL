@@ -266,6 +266,7 @@ class ui(cmd.Cmd):
         '''Show the information of current Vulnerability.'''
         if vul:
             if hasattr(vul, 'info'):
+                print "===========Vulnerability info: ================"
                 print vul.info
             else:
                 print '[Error]: This vulnerability has no info.'
@@ -276,6 +277,7 @@ class ui(cmd.Cmd):
         '''Show the information of current Exploit.'''
         if exp:
             if hasattr(exp, 'info'):
+                print "==============Exploit info: ==================="
                 print exp.info
             else:
                 print '[Error]: This exploit has no info.'
