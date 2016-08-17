@@ -1,12 +1,11 @@
-# VRL平台文档
+# VRL官方文档
 
 VRL（Vulnerability Research Lab）的研究目的在于，在 Linux 平台下测试并验证已有漏洞，分析开启不同防御机制的情况下对攻击过程的影响，学习和熟悉漏洞利用原理与技巧，尝试研究出新的攻击或防御方法。
 
-## 测试平台
+## 测试环境
 Ubuntu 16.04 LTS (64 bits)    
 
-## 实验环境
-漏洞程序主要使用 C 或 C++ 编写，对应 exp 脚本主要使用 Python 2.7 编写。   
+漏洞程序主要使用 C 或 C++ 编写，对应脚本主要使用 Python 2.7 编写。   
 
 建议安装的Python库：
 
@@ -48,7 +47,7 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
     + 不希望同时被更改option可以使用`setexp key value`和`setvul key value`，（更建议在设计时使用不同的属性名称）。
 
 + 选择payload：
-    + `usepay payname`选择payload，在这之前要确定你使用的Exploit支持更换Payload。
+    + `usepay payname` 或 `use p payname` `use pay payname` 选择payload，在这之前要确定你使用的Exploit支持更换Payload。
     + 这一命令将列出Exploit对于Payload的要求和当前Payload的信息供对比，询问是否使用。所以你并不需要单独的命令查看payload信息，如果不符合，就输入`n`放弃。
         + 目前仅支持一个Exploit中只包含一个Payload块，多个Payload连用使用工具连接，但分离的多个Payload并不支持。因为暂时没有遇到需要的情况。
 
@@ -84,158 +83,16 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
 
 ## 扩展方法
 
-### 增加Vulnerability
-增加新的漏洞程序需要在vulnerability文件夹中新建一个文件夹，以漏洞程序名命名，文件夹中包括：
- 
-- `__init__.py` ： python package标识，你可以忽略这个文件，至少运行一次模板run.py将会自动生成这一文件。
-- `run.py` ： 与平台交互的脚本，详见下面说明。
-- 可执行文件（可选）：漏洞程序，如果你可以仅在run.py中完成漏洞程序，则不需要。
-- 源码（可选）： 如果你希望你的漏洞程序可以跨平台，那么需要源码供make编译，否则不需要(可见的预期内并不会跨平台)。
-- 说明文档（可选）： 说明这一漏洞程序原理的文档。
-
-**注意：VRL平台只与你的run.py脚本交互**
-**你需要在当前`vulnerability\vulname`路径下直接运行run.py成功，_不要改动_class定义以外的内容。如果你的脚本单独能成功而在VRL中使用失败，请联系我。**
-
-一个简单的run.py如下：
-
-```python
-import...
-
-class Vulnerability(vulnerability.VRL_Vulnerability):
-    def __init__(self):
-        #在这里添加你的漏洞程序信息
-        self.name = 'stack_overflow'
-        self.info = 'information'
-        self.options={'dIP' : '127.0.0.1',
-                      'dPort' : '12345'}
-        self.exploit = 'stack_overflow'
-
-    def run(self):
-        #这一函数将被VRL启动以调用你的程序，确保你开启的时候按照options的参数
-        print 'run your vulnerability here'
-        
-    def stop(self):
-        #这一函数用于停止你的程序，如果你的程序无法，或不需要停止，可以没有这一函数
-
-    def make(self):
-        #重新编译你的程序
-        
-#这里默认检查你的脚本并以默认参数运行你的程序，无需更改
-#这使得如果run.py运行通过了，就可以在VRL中使用了。
-if __name__ == "__main__":
-    ... 
-```    
-
-漏洞程序的属性(__init__中)如下：
-
-+ name：字符串，脚本名称，建议与文件夹名一致。
-+ info：脚本的简单信息。
-+ options：必须（可以为空）。能够影响脚本运行的可设置选项和默认值。**注意：所有选项请统一为str类型，包括key和value**
-+ exploit：默认的exploit脚本名称（以路径名为准，而非name属性）。
-
-漏洞程序的方法如下：
-
-+ run：必须。这一函数将被VRL启动以调用你的程序，确保以当前设置运行。
-+ stop：非必须。用于终止你的程序。
-+ make：非必须。用于重新编译。
-
-#### 注意事项
-
-你的run方法会被VRL直接调用，所以你的程序必须短时间内结束，目标程序在后台执行。
-换句话说，这意味着如果你的程序需要命令行交互，你就必须在新的终端执行这一交互，否则VRL将陷入你的交互中。
-
-例如：
-run方法启动了一个server程序，这一server程序需要一直执行，等待链接并打印出当前状态。因此命令行被这一程序独占。
-这时你的VRL将无法操作：
-```bash
-(VRL)run vul
-server start... 
-waiting for client...
-                <--VRL命令行消失，因为这时vul的执行过程。
-```
-你当然可以再重新开启一个VRL运行Exploit，但这不是我们希望的交互方式。解决方法如下：
-
-当调用系统指令时，将命令command用VRL中moudules.tools中的函数加工为在新的终端调用。
-`command`->`new_terminal(command)`或`new_terminal_exit(command)`
-例如：
-```python
-os.popen('./vul').readlines() 或
-os.system('./vul')
-```
-更改为：
-```python
-os.popen(new_terminal('./vul')).readlines() 或
-os.system(new_terminal('./vul'))
-```
-`new_terminal`与`new_terminal_exit`不同在于后者将在程序运行后关闭终端，而前者留在终端。
-
-**当然，这一方法只适用于调用Bash时。**
-
-### 增加Exploit
-
-与增加Vulnerability基本相同，不同之处有：
-
-```python
-- from modules import vulnerability
-+ from modules import exploit
-
-- class Vulnerability(vulnerability.VRL_Vulnerability):
-+ class Exploit(exploit.VRL_Exploit):
-
-  def __init__(self):
-+     self.payload = '\0xAA...'
-+     self.payload_info = 'Information of the requirements of payload.'
-
-
-```
-
-+ 如果你的Exploit支持更换payload，可以在属性中添加payload属性，默认值为默认的字节流。
-+ payload_info中记录的信息将会在更换payload时显示，供使用者比较payload是否可用。建议包含的信息：
-    + 最大payload长度
-    + 是否限制NULL(\00)字节
-    + 是否需要Unicode编码
-    + 是否需要ROP或JOP构造
-    + 等等
-
-### 增加Payload
-
-与增加前两者不同，增加payload直接在payloads中添加python脚本。一个简单的payload脚本如下：
-
-```pytho
-#coding:UTF-8
-
-shellcode = "\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73"
-shellcode += "\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0"
-shellcode += "\x0b\xcd\x80"
-
-class Payload(object):
-	def __init__(self):
-		self.info = 'Information of the Payload.'
-		self.data = shellcode
-
-if __name__=='__main__':
-    ...
-```
-
-Payload类中只有两个必须的属性：
-
-+ info：记录payload的信息，供使用时参考。建议包含的信息：
-    + payload长度
-    + 是否有NULL(\00)字节
-    + 是否可以Unicode编码
-    + 是否为ROP或JOP构造
-    + 等等
-+ data：payload字节流本身。
-
-**同样地，你_不需要_更改class以外的部分，直接运行这个脚本就检查两个属性是否存在。然后打印info属性。这就意味着这个脚本可以使用了。**
+添加新的Exploit，Vulnerability，Payload和工具，请参考[扩展向导](documents/扩展向导.md)
 
 ---
 
 ## 待开发的功能：
 
-+ Exploit脚本中以payload name载入
 + payload加工
 + ROP/JOP构建
-+ auto attach/autoDEBUG
++ auto attach/auto DEBUG
 + 脚本名自动补全
++ 调用自定义方法
++ 打开/关闭系统ASLR，DEP
 
