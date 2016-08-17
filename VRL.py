@@ -91,7 +91,7 @@ class ui(cmd.Cmd):
             print 'Vulnerability Loaded'
             vulpath=os.path.join(sys.path[0],'vulnerabilities',name)
             if hasattr(vul,'exploit') and not exp:
-                c = raw_input("This vulnerability has a default exploit, use the exploit?(y/n):(y)")
+                c = raw_input("This vulnerability has a default exploit: '"+vul.exploit+"', use the exploit?(y/n):(y)")
                 if not c or c[0] != 'n':
                     self.do_useexp(vul.exploit)
         except Exception,e:
@@ -100,7 +100,7 @@ class ui(cmd.Cmd):
     def do_useexp(self,name):
         '''Use an exploit
         format: useexp exploit_name'''
-        global exp,exppath
+        global exp,exppath,pay
         try:
             _temp=__import__('exploits.'+name+'.run',globals(),locals(),fromlist=['Exploit'])
             Exploit= _temp.Exploit
@@ -108,9 +108,18 @@ class ui(cmd.Cmd):
             print 'Exploit Loaded'
             exppath=os.path.join(sys.path[0],'exploits',name)
             if hasattr(exp,'vulnerability') and not vul:
-                c = raw_input("This exploit has a default vulnerability, use the exploit?(y/n):(y)")
+                c = raw_input("This exploit has a default vulnerability: '"+exp.vulnerability+"', use the exploit?(y/n):(y)")
                 if not c or c[0] != 'n':
                     self.do_usevul(exp.vulnerability)
+            #load default payload
+            if hasattr(exp,'payload'):
+                if 'default_payload' in exp.options.keys():
+                    print "Exploit has a default payload,loading..."
+                    _temp = __import__('payloads.'+exp.options['default_payload'],globals(),locals(),fromlist=['Payload'])
+                    Payload =  _temp.Payload
+                    pay = Payload()
+                    exp.payload = pay.data
+                    print "Default payload: '"+exp.options["default_payload"]+"' loaded."
         except Exception,e:
             print e
 
