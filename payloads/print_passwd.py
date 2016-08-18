@@ -1,4 +1,5 @@
-#coding:UTF-8
+#! /usr/bin/python
+# coding:UTF-8
 '''Shellcode_RetOverwrite'''
 
 #shellcode = "\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73"
