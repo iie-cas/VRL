@@ -21,9 +21,7 @@ def share(key, value):
     path = '../../.tmp/share.json'
     json_data = {}
 
-    if 'share.json' not in os.listdir(path[0:-11]):
-        with open(path, 'w'):
-            pass
+    _check_share_path()
 
     if os.path.getsize(path) >0 :
         with open(path, 'r') as f:
@@ -37,9 +35,7 @@ def share(key, value):
 def clear_share():
     path = '../../.tmp/share.json'
 
-    if 'share.json' not in os.listdir(path[0:-11]):
-        with open(path, 'w'):
-            pass
+    _check_share_path()
 
     with open(path, 'w'):
         pass
@@ -48,12 +44,19 @@ def get_share(key):
     path = '../../.tmp/share.json'
     json_data={}
 
-    if 'share.json' not in os.listdir(path[0:-11]):
-        with open(path, 'w'):
-            pass
+    _check_share_path()
 
     if os.path.getsize(path) >0 :
         with open(path, 'r') as f:
             json_data = json.load(f)
 
     return json_data[str(key)]
+
+def _check_share_path():
+    path = '../../.tmp/share.json'
+    if not os.path.exists(path[0:-11]):
+        os.mkdir(path[0:-11])
+    if 'share.json' not in os.listdir(path[0:-11]):
+        with open(path, 'w'):
+            pass
+
