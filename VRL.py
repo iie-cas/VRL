@@ -3,6 +3,7 @@
 
 import sys
 import os
+from modules.tools import *
 
 try:
     import cmd2 as cmd
@@ -368,6 +369,30 @@ class ui(cmd.Cmd):
     def do_gdb(self, args):
         '''Open an gdb in a new terminal.(Use '!gdb' will fall into it.)'''
         os.system("gnome-terminal -e gdb")
+
+    def do_aslr(self, line):
+        '''Check status/Turn on/Turn off ASLR of system.
+        Format: aslr status/check/on/off/conservative'''
+        if line and line[1] in ['h','t', 'n','f','o']:
+            if line[1] in ['h','t']:
+                state = aslr_status()
+                if state == 2:
+                    print "ASLR: ON\n"
+                elif state == 0:
+                    print "ASLR: OFF\n"
+                elif state == 1:
+                    print "ASLR: Conservative ON\n"
+                else:
+                    print "Invalid Value."
+            elif line[1] == 'n':
+                aslr_on()
+            elif line[1] == 'f':
+                aslr_off()
+            elif line[1] == 'o':
+                aslr_conservative()
+
+        else:
+            print("[Error]: Wrong format.")
 
     def do_q(self, line):
         '''Quit VRL.'''

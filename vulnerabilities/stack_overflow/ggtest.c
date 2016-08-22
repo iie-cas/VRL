@@ -8,16 +8,21 @@
 #include<arpa/inet.h>
 #define MAXSIZE 1024
 
-void testVul(char *buff)
+long long int testVul(char *buff)
 {
 	char str[10];
 	strcpy(str, buff);
+	__asm__("movq %rbp, %rax");
+	__asm__("leave");
+	__asm__("ret");
+	//return;
 }
 
 
 int main(int argc,char *argv[])
 {
 	int listenfd, connfd;
+	long long int add;
 	struct sockaddr_in servaddr;
 	char buff[MAXSIZE];
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -57,12 +62,13 @@ int main(int argc,char *argv[])
 			exit(1);
 		}
 		printf("wating for data...\n");
-		int n;
+		int n,m;
 		while((n=recv(connfd, buff, MAXSIZE, 0))>0)
 		{
 			buff[n] = '\0';
-			testVul(buff);
-			printf("%s\n", buff);
+			add = testVul(buff);
+			sprintf(buff, "%016LX\n", add);
+			m=send(connfd, buff, MAXSIZE, 0);
 		}
 		close(connfd);
 	}
