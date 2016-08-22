@@ -1,25 +1,32 @@
 #! /usr/bin/python
 #coding:utf-8
-import sys
+import sys, os
 sys.path.append("../..")
 from modules import vulnerability
 from modules.tools import *
 
-import os
 class Vulnerability(vulnerability.VRL_Vulnerability):
     def __init__(self):
         '''Add information of your vulnerability here'''
         self.name = 'stack_overflow'
-        self.info = 'A simple server with stack overflow vulnerability.'
-        self.options={'dPort' : '34566'}
-        self.exploit = 'stack_overflow'
+        self.info = '''A simple server with stack overflow vulnerability.
+        In current version, ASLR should always OFF, script will ignore it.
+        When allow_stack_exec = True, use code_injection exploit.
+        When allow_stack_exec = False, use borrowed_code_chucks exploit.
+        '''
+        self.options={
+                'aslr': 'False',
+                'allow_stack_exec' : 'True',
+                'dPort' : '34567'}
+        self.exploit = 'code_injection'
 
     def run(self):
         '''Run your vulnerability here, if this script could success, the VRL can run it.
         When the vulnerability run, follow the options.'''
-        p = os.popen(new_terminal('./ggtest '+self.options['dPort']),'r')
-        #p = os.popen('gnome-terminal -e \'./ggtest '+ self.options['dPort']+"'",'r')
-        print p.read()
+        if eval(self.options['allow_stack_exec']):
+            p = os.popen(new_terminal('./code_injection '+self.options['dPort']),'r')
+        else:
+            p = os.popen(new_terminal('./borrowed_code_chunks '+self.options['dPort']),'r')
 
 '''Bellowing is default, simply ignore it.'''
 if __name__ == "__main__":
