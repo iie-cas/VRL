@@ -23,16 +23,16 @@ VRL平台大致分为五个部分。
 - UI：用户交互，整合所有其他模块。所有的漏洞程序，攻击程序和设置、加工由VRL.py调用。
 - Vulnerabilities：漏洞程序库，包括漏洞程序，漏洞程序调用脚本，程序源码，说明文档等。
 - Exploits： Exploits库，包括利用程序，说明文档等。
-- Payloads（待开发）： 供Exploits选用（如果支持）的Payload库。
+- Payloads： 供Exploits选用（如果支持）的Payload库。
 - Misc（待开发）: 其他工具，加工paylaods等。
 
 ## 功能和使用方法
 
 VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设置。
+*命令行支持各种自动补全，在输入较长的命令/参数/脚本名称时可以尝试自动补全。*
 
 + 列出可用Exploits，Vulnerability和Payload：
-    + `show exploits|vulnerability|payload`
-        + *Tip: `可以缩写为show e|v|p`*
+    + `show exploits|vulnerabilities|payloads`
         - 当VRL载入时，会自动扫描目录下符合格式的Exploit等脚本，如果你不希望重启VRL并加入新的脚本，使用reload指令。
 
 + 选择Exploit或Vulnerability：
@@ -42,7 +42,7 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
         + *Tip：当载入的Exploit或Vulnerability有一个默认的Vulnerability或Exploit，VRL会提醒你是否载入对应脚本。*
         
 + 设置Exploit和Vulnerability的选项：
-    + `show option` 或`show o` 显示所有选项（包括Exploit和Vulnerability）。
+    + `show options` 显示所有选项（包括Exploit和Vulnerability）。
     + `set key value` 将改变key为value。这里`value`将作为字符串赋值，在脚本中注意这一属性。这里设计上认为Exploit和Vulnerability中相同名称的key应该保持相同值。在脚本中注意这一设计。
     + 不希望同时被更改option可以使用`setexp key value`和`setvul key value`，（更建议在设计时使用不同的属性名称）。
 
@@ -92,7 +92,5 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
 + payload加工
 + ROP/JOP构建
 + auto attach/auto DEBUG
-+ 脚本名自动补全
 + 调用自定义方法
-+ 打开/关闭系统ASLR，DEP
 
