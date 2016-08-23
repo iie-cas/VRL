@@ -17,16 +17,17 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
         self.options={
                 'aslr': 'False',
                 'allow_stack_exec' : 'True',
-                'dPort' : '34567'}
-        self.exploit = 'code_injection'
+                'port' : '34567'}
+        self.exploit = ['code_injection', 'borrowed_code_chunks']
 
     def run(self):
+        aslr_off()
         '''Run your vulnerability here, if this script could success, the VRL can run it.
         When the vulnerability run, follow the options.'''
         if eval(self.options['allow_stack_exec']):
-            p = os.popen(new_terminal('./code_injection '+self.options['dPort']),'r')
+            p = os.popen(new_terminal('./code_injection '+self.options['port']),'r')
         else:
-            p = os.popen(new_terminal('./borrowed_code_chunks '+self.options['dPort']),'r')
+            p = os.popen(new_terminal('./borrowed_code_chunks '+self.options['port']),'r')
 
 '''Bellowing is default, simply ignore it.'''
 if __name__ == "__main__":
