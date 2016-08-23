@@ -29,7 +29,8 @@ VRL平台大致分为五个部分。
 ## 功能和使用方法
 
 VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设置。
-*命令行支持各种自动补全，在输入较长的命令/参数/脚本名称时可以尝试自动补全。*
+
+*命令行支持多种自动补全，在输入较长的命令/参数/脚本名称时可以尝试自动补全。*
 
 + 列出可用Exploits，Vulnerability和Payload：
     + `show exploits|vulnerabilities|payloads`
