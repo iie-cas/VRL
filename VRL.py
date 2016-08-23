@@ -11,7 +11,7 @@ except ImportError:
     import cmd
 
 class ui(cmd.Cmd):
-    prompt = '(VRL)'
+    prompt = 'VRL > '
     intro = 'Welcome to VRL'
 
     def do_reload(self, line):
@@ -57,22 +57,26 @@ class ui(cmd.Cmd):
         format: list exploit|vulnerabilities|payload|options (e|v|p|o for short.)'''
         if type:
             path = {'exploits': exploit_list, 'vulnerabilities': vulnerability_list, 'payloads': payload_list}
+            _cmd = path.keys()
+            _cmd.append('options')
+            for i in _cmd:
+                if i.startswith(type): type=i
             if type in path.keys():
-                print "==============================================="
+                print_line('')
                 for i in path[type]:
                     print i
-                print "==============================================="
+                print_line('')
             elif type == 'options':  # for options
                 if vul or exp:
                     if vul:
-                        print "============Vulnerability options:============="
+                        print_line('Vulnerability options:')
                         for (key, value) in vul.options.items():
                             print key, ':', value
                     if exp:
-                        print "==============Exploit options:================="
+                        print_line('Exploit options:')
                         for (key, value) in exp.options.items():
                             print key, ':', value
-                    print "==============================================="
+                    print_line('')
                 else:
                     print '[Error]: No vulnerability or exploit using.'
             else:
@@ -94,11 +98,15 @@ class ui(cmd.Cmd):
             vul = Vulnerability()
             print 'Vulnerability Loaded.'
             vulpath = os.path.join(sys.path[0], 'vulnerabilities', name)
-            if hasattr(vul, 'exploit') and not exp:
-                c = raw_input(
-                    ">This vulnerability has a default exploit: '" + vul.exploit + "', \n>use the exploit?(y/n):(y)")
-                if not c or c[0] != 'n':
-                    self.do_useexp(vul.exploit)
+            self.do_infovul('')
+            if hasattr(vul, 'exploit') and vul.exploit:
+                print_line('Supported Exploits:')
+                if type(vul.exploit) == str:
+                    print vul.exploit
+                elif type(vul.exploit) == list:
+                    for i in vul.exploit:
+                        print i
+                print_line('')
         except Exception, e:
             print '[Error]:', e
 
@@ -114,13 +122,24 @@ class ui(cmd.Cmd):
             Exploit = _temp.Exploit
             exp = Exploit()
             print 'Exploit Loaded.'
+            self.do_infoexp('')
             exppath = os.path.join(sys.path[0], 'exploits', name)
-            if hasattr(exp, 'vulnerability') and exp.vulnerability and not vul:
-                c = raw_input(
-                    ">This exploit has a default vulnerability: '" + \
-                    exp.vulnerability + "', \n>use the vulnerability?(y/n):(y)")
-                if not c or c[0] != 'n':
-                    self.do_usevul(exp.vulnerability)
+            if hasattr(exp, 'vulnerability') and exp.vulnerability:
+                print_line('Supported Vulnerabilities:')
+                if type(exp.vulnerability) == str:
+                    print exp.vulnerability
+                elif type(exp.vulnerability) == list:
+                    for i in exp.vulnerability:
+                        print i
+                print_line('')
+
+            # auto options fixing
+            if vul:
+                print '>Vulnerability exist, auto_sync options(exp->vul).'
+                for _key in vul.options.keys():
+                    if _key in exp.options.keys():
+                        vul.options[_key] = exp.options[_key]
+
             # load default payload
             if hasattr(exp, 'payload'):
                 if 'default_payload' in exp.options.keys() and exp.options['default_payload']:
@@ -132,7 +151,7 @@ class ui(cmd.Cmd):
                     exp.payload = pay.data
                     print ">Default payload: '" + exp.options["default_payload"] + "' loaded."
         except Exception, e:
-            print '[Error]', e
+            print '[Error]:', e
 
     def complete_useexp(self, text, line, begidx, endidx):
         return [i for i in exploit_list if i.startswith(text)]
@@ -192,15 +211,34 @@ class ui(cmd.Cmd):
         if begidx == 4:
             list = self.complete_useexp(text, line, begidx, endidx)
             list.extend(self.complete_usevul(text, line, begidx, endidx))
-            list.extend(['exp', 'vul'])
+            list.extend(['exp', 'vul', 'pay'])
             return [i for i in list if i.startswith(text)]
         else:
             if line[4] == 'e':
                 return self.complete_useexp(text, line, begidx, endidx)
             elif line[4] == 'v':
                 return self.complete_usevul(text, line, begidx, endidx)
+            elif line[4] == 'p':
+                return self.complete_usepay(text, line, begidx, endidx)
+
             else:
                 return []
+
+    def _check_before_running(self):
+        '''Check the options.'''
+        if hasattr(self,'ignore_check_before_running'): return True
+        if exp and vul:
+            for _key in vul.options.keys():
+                if _key in exp.options.keys():
+                    if vul.options[_key] != exp.options[_key]:
+                        _input = raw_input(\
+                            '[Warring]: Options of vulnerability and exploit do not match,\nContinue? y/n:(n)')
+                        if _input and _input[0] == 'y':
+                            print "[Warring]: Continue, we won't warn you again."
+                            self.ignore_check_before_running = True
+                        else:
+                            return False
+        return True
 
     def do_run(self, name):
         '''Quick run a vulnerability and it's default exploit with default options
@@ -227,6 +265,7 @@ class ui(cmd.Cmd):
 
     def do_runvul(self, line):
         '''Run the vulnerability using'''
+        if not self._check_before_running(): return
         if vul:
             print 'Vulnerability Running...'
             os.chdir(vulpath)
@@ -239,6 +278,7 @@ class ui(cmd.Cmd):
 
     def do_runexp(self, line):
         '''Run the exploit using'''
+        if not self._check_before_running(): return
         if exp:
             print 'Exploit Running...'
             os.chdir(vulpath)
@@ -325,7 +365,7 @@ class ui(cmd.Cmd):
         '''Show the information of current Vulnerability.'''
         if vul:
             if hasattr(vul, 'info'):
-                print "===========Vulnerability info: ================"
+                print_line('Vulnerability information:')
                 print vul.info
             else:
                 print '[Error]: This vulnerability has no info.'
@@ -336,7 +376,7 @@ class ui(cmd.Cmd):
         '''Show the information of current Exploit.'''
         if exp:
             if hasattr(exp, 'info'):
-                print "==============Exploit info: ==================="
+                print_line('Exploit information:')
                 print exp.info
             else:
                 print '[Error]: This exploit has no info.'
