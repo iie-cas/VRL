@@ -56,13 +56,13 @@ class ui(cmd.Cmd):
         '''Show all exploits|vulnerabilities|payload|options
         format: list exploit|vulnerabilities|payload|options (e|v|p|o for short.)'''
         if type:
-            path = {'e': exploit_list, 'v': vulnerability_list, 'p': payload_list}
-            if type[0] in path.keys():
+            path = {'exploits': exploit_list, 'vulnerabilities': vulnerability_list, 'payloads': payload_list}
+            if type in path.keys():
                 print "==============================================="
-                for i in path[type[0]]:
+                for i in path[type]:
                     print i
                 print "==============================================="
-            elif type[0] == 'o':  # for options
+            elif type == 'options':  # for options
                 if vul or exp:
                     if vul:
                         print "============Vulnerability options:============="
@@ -79,6 +79,10 @@ class ui(cmd.Cmd):
                 print "[Error]: Invalid argument."
         else:
             print "[Error]: Wrong format!"
+
+    def complete_show(self, text, line, begidx, endidx):
+        args = ['options', 'payloads', 'exploits', 'vulnerabilities']
+        return [i for i in args if i.startswith(text)]
 
     def do_usevul(self, name):
         '''Use a vulnerability
@@ -98,6 +102,9 @@ class ui(cmd.Cmd):
         except Exception, e:
             print '[Error]:', e
 
+    def complete_usevul(self, text, line, begidx, endidx):
+        return [i for i in vulnerability_list if i.startswith(text)]
+
     def do_useexp(self, name):
         '''Use an exploit
         format: useexp exploit_name'''
@@ -108,14 +115,15 @@ class ui(cmd.Cmd):
             exp = Exploit()
             print 'Exploit Loaded.'
             exppath = os.path.join(sys.path[0], 'exploits', name)
-            if hasattr(exp, 'vulnerability') and not vul:
+            if hasattr(exp, 'vulnerability') and exp.vulnerability and not vul:
                 c = raw_input(
-                    ">This exploit has a default vulnerability: '" + exp.vulnerability + "', \n>use the exploit?(y/n):(y)")
+                    ">This exploit has a default vulnerability: '" + \
+                    exp.vulnerability + "', \n>use the vulnerability?(y/n):(y)")
                 if not c or c[0] != 'n':
                     self.do_usevul(exp.vulnerability)
             # load default payload
             if hasattr(exp, 'payload'):
-                if 'default_payload' in exp.options.keys():
+                if 'default_payload' in exp.options.keys() and exp.options['default_payload']:
                     print ">Exploit has a default payload,loading..."
                     _temp = __import__('payloads.' + exp.options['default_payload'], globals(), locals(),
                                        fromlist=['Payload'])
@@ -126,6 +134,9 @@ class ui(cmd.Cmd):
         except Exception, e:
             print '[Error]', e
 
+    def complete_useexp(self, text, line, begidx, endidx):
+        return [i for i in exploit_list if i.startswith(text)]
+
     def do_usepay(self, name):
         '''Use a payload
         format: usepay payload_name'''
@@ -135,7 +146,7 @@ class ui(cmd.Cmd):
             print '[Error]: You should use an exploit before use a payload.'
             return
         else:
-            if not hasattr(exp, 'payload'):
+            if not hasattr(exp, 'payload') and exp.payload:
                 print '[Error]: Current exploit does not support change payload.'
                 return
         # load payload
@@ -153,6 +164,9 @@ class ui(cmd.Cmd):
         except Exception, e:
             print e
 
+    def complete_usepay(self, text, line, begidx, endidx):
+        return [i for i in payload_list if i.startswith(text)]
+
     def do_use(self, name):
         '''Load the vulnerability and exploit with same name.
         format: use name
@@ -168,10 +182,48 @@ class ui(cmd.Cmd):
                 else:
                     self.do_usevul(name_)
                 return
-
+        print 'Try to load vulnerability: ', name
         self.do_usevul(name)
         if not exp:
+            print 'Try to load exploit: ', name
             self.do_useexp(name)
+
+    def complete_use(self, text, line, begidx, endidx):
+        if begidx == 4:
+            list = self.complete_useexp(text, line, begidx, endidx)
+            list.extend(self.complete_usevul(text, line, begidx, endidx))
+            list.extend(['exp', 'vul'])
+            return [i for i in list if i.startswith(text)]
+        else:
+            if line[4] == 'e':
+                return self.complete_useexp(text, line, begidx, endidx)
+            elif line[4] == 'v':
+                return self.complete_usevul(text, line, begidx, endidx)
+            else:
+                return []
+
+    def do_run(self, name):
+        '''Quick run a vulnerability and it's default exploit with default options
+        format: run []
+        Mention: run exp/e equals runexp
+                run vul/v equals runvul'''
+        if name in ['exp', 'vul', 'e', 'v']:
+            if name in ['exp', 'e']:
+                self.do_runexp('')
+            else:
+                self.do_runvul('')
+            return
+        print 'Quick running...'
+        if not vul and not exp:
+            if not name:
+                print "[Error]: No vulnerability or exploit using, enter a name to quick run."
+                return
+            self.do_usevul(name)
+        self.do_runvul('')
+        self.do_runexp('')
+
+    def complete_run(self, text, line, begidx, endidx):
+        return self._complete_e_or_v(text, line, begidx, endidx)
 
     def do_runvul(self, line):
         '''Run the vulnerability using'''
@@ -230,6 +282,9 @@ class ui(cmd.Cmd):
         self.do_stopexp(line)
         self.do_stopvul(line)
 
+    def complete_stop(self, text, line, begidx, endidx):
+        return self._complete_e_or_v(text, line, begidx, endidx)
+
     def do_makevul(self, line):
         '''Recompile the vulnerability using'''
         if vul:
@@ -262,6 +317,9 @@ class ui(cmd.Cmd):
             return
         self.do_makeexp(line)
         self.do_makevul(line)
+
+    def complete_make(self, text, line, begidx, endidx):
+        return self._complete_e_or_v(text, line, begidx, endidx)
 
     def do_infovul(self, line):
         '''Show the information of current Vulnerability.'''
@@ -298,25 +356,8 @@ class ui(cmd.Cmd):
         self.do_infoexp(line)
         self.do_infovul(line)
 
-    def do_run(self, name):
-        '''Quick run a vulnerability and it's default exploit with default options
-        format: run []
-        Mention: run exp/e equals runexp
-                run vul/v equals runvul'''
-        if name in ['exp', 'vul', 'e', 'v']:
-            if name in ['exp', 'e']:
-                self.do_runexp('')
-            else:
-                self.do_runvul('')
-            return
-        print 'Quick running...'
-        if not vul and not exp:
-            if not name:
-                print "[Error]: No vulnerability or exploit using, enter a name to quick run."
-                return
-            self.do_usevul(name)
-        self.do_runvul('')
-        self.do_runexp('')
+    def complete_info(self, text, line, begidx, endidx):
+        return self._complete_e_or_v(text, line, begidx, endidx)
 
     def do_set(self, args):
         '''This command will automatically find the option of vulnerability or exploit.
@@ -324,6 +365,12 @@ class ui(cmd.Cmd):
         Notice: When the vulnerability and exploit share same keys, they will change together.
                  if you want to only change one of them, use 'setvul'/'setexp' command.'''
         [key, value] = args.split(' ')[0:2]
+        if key in ['e', 'exp']:
+            self.do_setexp(args[len(key)+1:])
+            return
+        if key in ['v', 'vul']:
+            self.do_setvul(args[len(key)+1:])
+            return
         suc = False  # found or not
         if vul:
             for (k, _) in vul.options.items():
@@ -339,6 +386,20 @@ class ui(cmd.Cmd):
                     suc = True
         if not suc:
             print "[Error]: no such key found."
+
+    def complete_set(self, text, line, begidx, endidx):
+        if begidx == 4:
+            list = self.complete_setexp(text, line, begidx, endidx)
+            list.extend(self.complete_setvul(text, line, begidx, endidx))
+            list.extend(['exp', 'vul'])
+            return [i for i in list if i.startswith(text)]
+        else:
+            if line[4] == 'e':
+                return self.complete_setexp(text, line, begidx, endidx)
+            elif line[4] == 'v':
+                return self.complete_setvul(text, line, begidx, endidx)
+            else:
+                return []
 
     def do_setvul(self, args):
         '''See help set.'''
@@ -353,6 +414,11 @@ class ui(cmd.Cmd):
         if not suc:
             print "[Error]: no such key found."
 
+    def complete_setvul(self, text, line, begidx, endidx):
+        if not vul: return []
+        if not text: return vul.options.keys()
+        return [i for i in vul.options.keys() if i.startswith(text)]
+
     def do_setexp(self, args):
         '''See help set.'''
         [key, value] = args.split(' ')[0:2]
@@ -366,6 +432,11 @@ class ui(cmd.Cmd):
         if not suc:
             print "[Error]: no such key found."
 
+    def complete_setexp(self, text, line, begidx, endidx):
+        if not exp: return []
+        if not text: return exp.options.keys()
+        return [i for i in exp.options.keys() if i.startswith(text)]
+
     def do_gdb(self, args):
         '''Open an gdb in a new terminal.(Use '!gdb' will fall into it.)'''
         os.system("gnome-terminal -e gdb")
@@ -373,7 +444,7 @@ class ui(cmd.Cmd):
     def do_aslr(self, line):
         '''Check status/Turn on/Turn off ASLR of system.
         Format: aslr status/check/on/off/conservative'''
-        if line and line[1] in ['h','t', 'n','f','o']:
+        if line in ['status', 'check', 'on', 'off', 'conservative']:
             if line[1] in ['h','t']:
                 state = aslr_status()
                 if state == 2:
@@ -394,10 +465,17 @@ class ui(cmd.Cmd):
         else:
             print("[Error]: Wrong format.")
 
+    def complete_aslr(self, text, line, begidx, endidx):
+        return [i for i in ['status', 'check', 'on', 'off', 'conservative'] if i.startswith(text)]
+
     def do_q(self, line):
         '''Quit VRL.'''
         return True
 
+    def _complete_e_or_v(self, text, line, begidx, endidx):
+        if text:
+            return [i for i in ['exp', 'vul'] if i.startswith(text)]
+        return []
 
 # list of exp & vul & payload
 exploit_list = []
