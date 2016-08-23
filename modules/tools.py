@@ -60,3 +60,28 @@ def _check_share_path():
         with open(path, 'w'):
             pass
 
+def aslr_status():
+    p = os.popen(r"cat /proc/sys/kernel/randomize_va_space")
+    ans = p.read()
+    return int(ans[0])
+
+def aslr_on():
+    if aslr_status() == 2:
+        print 'ASLR is already ON\n'
+        return
+    print 'ASLR>>ON, need password.\n'
+    os.popen(new_terminal_exit(r"sudo sysctl -w kernel.randomize_va_space=2"))
+
+def aslr_off():
+    if aslr_status() == 0:
+        print 'ASLR is already OFF\n'
+        return
+    print 'ASLR>>OFF, need password.\n'
+    os.popen(new_terminal_exit(r"sudo sysctl -w kernel.randomize_va_space=0"))
+
+def aslr_conservative():
+    if aslr_status() == 1:
+        print 'ASLR is already Conservative\n'
+        return
+    print 'ASLR>>Conservative, need password.\n'
+    os.popen(new_terminal_exit(r"sudo sysctl -w kernel.randomize_va_space=1"))
