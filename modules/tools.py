@@ -93,8 +93,8 @@ def aslr_conservative():
                                            stdin=subprocess.PIPE,shell= True)
     p.wait()
 
-
-def print_line(str):
+def print_line(str, padding='='):
+    '''Print str expanded to a whole line.'''
     try:
         import commands
         _output = commands.getoutput('resize')
@@ -103,6 +103,43 @@ def print_line(str):
         print '[Warring]: It seems failed when import "commands".'
         columns = 80
     _length = columns
-    _padding = '='
-    _str = str.center(_length,_padding)
+    _str = str.center(_length,padding)
     print _str
+
+def find_executable_file(path):
+    '''Return a list of executable file names in the path.'''
+    import ElfHeader
+    lst = []
+    for _file in os.listdir(path):
+        os.chdir(path)
+        try:
+            with open(_file,'rb') as f:
+                fstr = f.read()
+                header = ElfHeader.ElfHeader.parse(fstr)
+                if header:
+                    if header.e_type == 2:
+                        lst.append(str(_file))
+        except:
+            pass
+    return lst
+
+def pidof(file_name):
+    '''Same as bash, return a list of pid number.'''
+    p = subprocess.Popen(r"pidof " + str(file_name), stdout=subprocess.PIPE, shell= True)
+    lst = p.stdout.read().split()
+    lst = [int(i) for i in lst]
+    return lst
+
+def gdb(file_name='',pid=0, path='', sudo=True):
+    '''Open a gdb.'''
+    _cmd = ''
+    if sudo: _cmd += 'sudo '
+    _cmd += 'gdb '
+    if file_name: _cmd += file_name + ' ' + str(pid)
+    if path:
+        os.chdir(path)
+        sys.path.append(path)
+        os.system(new_terminal_exit(_cmd))
+        sys.path.remove(path)
+    else:
+        os.system(new_terminal_exit(_cmd))
