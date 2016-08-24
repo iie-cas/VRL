@@ -3,12 +3,13 @@
 
 import sys
 import os
-from modules.tools import *
 
 try:
     import cmd2 as cmd
 except ImportError:
     import cmd
+
+from modules.tools import *
 
 class ui(cmd.Cmd):
     prompt = 'VRL > '
@@ -91,13 +92,13 @@ class ui(cmd.Cmd):
     def do_usevul(self, name):
         '''Use a vulnerability
         format: usevul vulnerability_name'''
-        global vul, vulpath
+        global vul, vul_path
         try:
             _temp = __import__('vulnerabilities.' + name + '.run', globals(), locals(), fromlist=['Vulnerability'])
             Vulnerability = _temp.Vulnerability
             vul = Vulnerability()
             print 'Vulnerability Loaded.'
-            vulpath = os.path.join(sys.path[0], 'vulnerabilities', name)
+            vul_path = os.path.join(sys.path[0], 'vulnerabilities', name)
             self.do_infovul('')
             if hasattr(vul, 'exploit') and vul.exploit:
                 print_line('Supported Exploits:')
@@ -116,14 +117,14 @@ class ui(cmd.Cmd):
     def do_useexp(self, name):
         '''Use an exploit
         format: useexp exploit_name'''
-        global exp, exppath, pay
+        global exp, exp_path, pay
         try:
             _temp = __import__('exploits.' + name + '.run', globals(), locals(), fromlist=['Exploit'])
             Exploit = _temp.Exploit
             exp = Exploit()
             print 'Exploit Loaded.'
             self.do_infoexp('')
-            exppath = os.path.join(sys.path[0], 'exploits', name)
+            exp_path = os.path.join(sys.path[0], 'exploits', name)
             if hasattr(exp, 'vulnerability') and exp.vulnerability:
                 print_line('Supported Vulnerabilities:')
                 if type(exp.vulnerability) == str:
@@ -268,10 +269,10 @@ class ui(cmd.Cmd):
         if not self._check_before_running(): return
         if vul:
             print 'Vulnerability Running...'
-            os.chdir(vulpath)
-            sys.path.append(vulpath)
+            os.chdir(vul_path)
+            sys.path.append(vul_path)
             vul.run()
-            sys.path.remove(vulpath)
+            sys.path.remove(vul_path)
             print 'Script Finished.'
         else:
             print '[Error]: No vulnerability using.'
@@ -281,10 +282,10 @@ class ui(cmd.Cmd):
         if not self._check_before_running(): return
         if exp:
             print 'Exploit Running...'
-            os.chdir(vulpath)
-            sys.path.append(exppath)
+            os.chdir(vul_path)
+            sys.path.append(exp_path)
             exp.run()
-            sys.path.remove(exppath)
+            sys.path.remove(exp_path)
             print 'Script Finished.'
         else:
             print '[Error]: No exploit using.'
@@ -526,8 +527,8 @@ exp = []
 vul = []
 pay = ''
 # path
-exppath = sys.path[0]
-vulpath = sys.path[0]
+exp_path = sys.path[0]
+vul_path = sys.path[0]
 
 VRLui = ui()
 
