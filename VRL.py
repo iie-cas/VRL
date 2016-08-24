@@ -481,7 +481,29 @@ class ui(cmd.Cmd):
 
     def do_gdb(self, args):
         '''Open an gdb in a new terminal.(Use '!gdb' will fall into it.)'''
-        os.system("gnome-terminal -e gdb")
+        gdb()
+
+    def do_attach(self, line):
+        '''Use gdb to attach the program automatically(ELF only).
+        format: attach          attach the vulnerability.
+                attach  e/v     attach the exploit/vulnerability.'''
+        file_pids=[]
+        _path =  vul_path
+        if line and line[0] == 'e': _path = exp_path
+
+        for i in find_executable_file(_path):
+            _pid = pidof(i)
+            if _pid:
+                for j in _pid:
+                    file_pids.extend([(i, j)])
+
+        if not file_pids:
+            print '[Error]: Process not found.'
+        else:
+            max_pid = max(file_pids,key=lambda x: x[1])
+            if len(file_pids) > 1:
+                print '[Warring]: More than one process found, attach max pid: %d' % max_pid[1]
+            gdb(file_name=max_pid[0], pid=max_pid[1], path=_path)
 
     def do_aslr(self, line):
         '''Check status/Turn on/Turn off ASLR of system.
@@ -539,5 +561,6 @@ for attr in ['do_list', 'do_r', 'do_cmdenvironment', 'do_history', 'do_hi', 'do_
     if hasattr(cmd.Cmd, attr): delattr(cmd.Cmd, attr)
 
 VRLui.do_reload('')
+VRLui.prompt = VRLui.colorize(VRLui.colorize(VRLui.prompt, 'bold'), 'cyan')
 VRLui.cmdloop()
 
