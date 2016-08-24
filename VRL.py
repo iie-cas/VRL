@@ -257,7 +257,7 @@ class ui(cmd.Cmd):
             if not name:
                 print "[Error]: No vulnerability or exploit using, enter a name to quick run."
                 return
-            self.do_usevul(name)
+            self.do_use(name)
         self.do_runvul('')
         self.do_runexp('')
 
