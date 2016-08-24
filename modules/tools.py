@@ -1,6 +1,6 @@
 #! /usr/bin/python
 #coding:utf-8
-import sys, os, json
+import sys, os, json, subprocess
 
 '''Tools for VRL script'''
 
@@ -61,27 +61,48 @@ def _check_share_path():
             pass
 
 def aslr_status():
-    p = os.popen(r"cat /proc/sys/kernel/randomize_va_space")
-    ans = p.read()
+    subprocess.PIPE
+    p = subprocess.Popen("cat /proc/sys/kernel/randomize_va_space",stdout=subprocess.PIPE,shell= True)
+    ans = p.stdout.read()
     return int(ans[0])
 
 def aslr_on():
     if aslr_status() == 2:
         print 'ASLR is already ON\n'
         return
-    print 'ASLR>>ON, need password.\n'
-    os.popen(new_terminal_exit(r"sudo sysctl -w kernel.randomize_va_space=2"))
+    print 'ASLR>>ON, may need password.\n'
+    p = subprocess.Popen(r"sudo sysctl -w kernel.randomize_va_space=2",\
+                                           stdin=subprocess.PIPE,shell= True)
+    p.wait()
 
 def aslr_off():
     if aslr_status() == 0:
         print 'ASLR is already OFF\n'
         return
-    print 'ASLR>>OFF, need password.\n'
-    os.popen(new_terminal_exit(r"sudo sysctl -w kernel.randomize_va_space=0"))
+    print 'ASLR>>OFF, may need password.\n'
+    p = subprocess.Popen(r"sudo sysctl -w kernel.randomize_va_space=0", \
+                                           stdin=subprocess.PIPE,shell= True)
+    p.wait()
 
 def aslr_conservative():
     if aslr_status() == 1:
         print 'ASLR is already Conservative\n'
         return
-    print 'ASLR>>Conservative, need password.\n'
-    os.popen(new_terminal_exit(r"sudo sysctl -w kernel.randomize_va_space=1"))
+    print 'ASLR>>Conservative, may need password.\n'
+    p = subprocess.Popen(r"sudo sysctl -w kernel.randomize_va_space=1", \
+                                           stdin=subprocess.PIPE,shell= True)
+    p.wait()
+
+
+def print_line(str):
+    try:
+        import commands
+        _output = commands.getoutput('resize')
+        columns = int(_output.split(';')[0].split('=')[-1])
+    except:
+        print '[Warring]: It seems failed when import "commands".'
+        columns = 80
+    _length = columns
+    _padding = '='
+    _str = str.center(_length,_padding)
+    print _str
