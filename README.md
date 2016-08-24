@@ -40,7 +40,7 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
     + `useexp expname` 或`use e expname` `use exp expname`
     + `usevul vulname` 或`use v vulname` `use vul vulname`
     + `use name`将使用同一name尝试载入Exploit和Vulnerability。
-        + *Tip：当载入的Exploit或Vulnerability有一个默认的Vulnerability或Exploit，VRL会提醒你是否载入对应脚本。*
+        + *Tip：当载入的Exploit时，如果加载了Vulnerability，VRL会将Exploit的默认设置同步到Vulnerability中。*
         
 + 设置Exploit和Vulnerability的选项：
     + `show options` 显示所有选项（包括Exploit和Vulnerability）。
@@ -56,7 +56,7 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
     + `runexp` 或`run e` `run exp`
     + `runvul` 或`run v` `run vul`
     + `run` 将先运行Vulnerability，再运行Exploit。
-        + *Tip: 如果Vulnerability指定了默认的Exploit，可以使用`run vulname`来快速运行，甚至不需要use载入。*
+        + *Tip: 如果Vulnerability和Exploit同名，可以使用`run name`来快速运行，甚至不需要use载入。*
 
 + 停止Exploit或Vulnerability：
     + 这一功能需要脚本中有stop()函数，用于在终止在后台运行的脚本。如果不需要，可以没有这一函数。
@@ -74,6 +74,7 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
 + 其他
     + `help`将列出所用命令，`help command`或`?command`将给出帮助。
     + `q`退出VRL
+    + `aslr`命令用于查询和更改系统ASLR状态。
     + `gdb`将调出GDB，这将不会像使用`!gdb`这样让当前终端陷入GDB。
     + 命令不区分大小写，但脚本名区分。
     + 强烈建议安装cmd2，如果你安装了cmd2包，将优先使用cmd2，这将带来如下便利：
