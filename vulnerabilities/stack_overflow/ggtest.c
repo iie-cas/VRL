@@ -31,7 +31,7 @@ long long int testVul(int connfd)
 	__asm__("leave");
 	__asm__("ret");
 	
-	/*// Borrowed code chunks  
+	/*// code reuse
        
 	long long int ans;
 	ans=systemaddr();
