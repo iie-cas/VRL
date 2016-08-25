@@ -3,7 +3,7 @@
 import sys, os
 sys.path.append("../..")
 from modules import vulnerability
-from modules.tools import *
+from modules.script_tools import *
 
 class Vulnerability(vulnerability.VRL_Vulnerability):
     def __init__(self):
