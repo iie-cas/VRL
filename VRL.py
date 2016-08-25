@@ -4,13 +4,14 @@
 
 import sys
 import os
+import json
 
 try:
     import cmd2 as cmd
 except ImportError:
     import cmd
 
-from modules.tools import *
+from modules.script_tools import *
 
 class ui(cmd.Cmd):
     prompt = 'VRL > '
@@ -20,7 +21,7 @@ class ui(cmd.Cmd):
         '''Reload all exploits,vulnerabilities,payloads,etc.
         When VRL started, loading is done.
         So you only need to use this when you add something new and do not want to restart VRL.'''
-        global exploit_list, vulnerability_list, payload_list
+        global exploit_list, vulnerability_list, payload_list, misc_list
         exploit_list = []
         vulnerability_list = []
         payload_list = []
@@ -31,11 +32,13 @@ class ui(cmd.Cmd):
                     if 'run.py' in os.listdir(os.path.join(subpath, name)):
                         if type == 'exploits': exploit_list.append(str(name))
                         if type == 'vulnerabilities': vulnerability_list.append(str(name))
-        for i in os.listdir(os.path.join(os.curdir, 'payloads')):
-            [a, b] = os.path.splitext(str(i))
-            if b == '.py':
-                if a != '__init__':
-                    payload_list.append(a)
+        for type in ['payloads', 'misc']:
+            for i in os.listdir(os.path.join(os.curdir, type)):
+                [a, b] = os.path.splitext(str(i))
+                if b in ['.py', '.json']:
+                    if a != '__init__':
+                        if type == 'misc': misc_list.append(a)
+                        else: payload_list.append(a)
 
     def do_guide(self, line):
         '''Show a simple guide.'''
@@ -58,7 +61,8 @@ class ui(cmd.Cmd):
         '''Show all exploits|vulnerabilities|payload|options
         format: list exploit|vulnerabilities|payload|options (e|v|p|o for short.)'''
         if type:
-            path = {'exploits': exploit_list, 'vulnerabilities': vulnerability_list, 'payloads': payload_list}
+            path = {'exploits': exploit_list, 'vulnerabilities': vulnerability_list,\
+                    'payloads': payload_list, 'tools': misc_list}
             _cmd = path.keys()
             _cmd.append('options')
             for i in _cmd:
@@ -87,7 +91,7 @@ class ui(cmd.Cmd):
             print "[Error]: Wrong format!"
 
     def complete_show(self, text, line, begidx, endidx):
-        args = ['options', 'payloads', 'exploits', 'vulnerabilities']
+        args = ['options', 'payloads', 'exploits', 'vulnerabilities', 'tools']
         return [i for i in args if i.startswith(text)]
 
     def do_usevul(self, name):
@@ -171,6 +175,29 @@ class ui(cmd.Cmd):
                 print '[Error]: Current exploit does not support change payload.'
                 return
         # load payload
+        #try .json first
+        if name+'.json' in str(os.listdir('./payloads')):
+            try:
+                with open('./payloads/'+name+'.json', 'r') as f:
+                    json_data = json.load(f)
+                    class _tmp_pay(object):
+                        info = ''
+                        data = ''
+                    pay = _tmp_pay()
+                    pay.info = json_data['info']
+                    pay.data = eval("str('"+json_data['data']+"')")     #This is unsafe, and ugly.
+                    print pay.info                                      #who can tell me a better way? by author
+                    c = raw_input(">Payload info:\n" + pay.info + "\nAre you sure to use the payload?(y/n):(y)")
+                    if not c or c[0] != 'n':
+                        exp.payload = pay.data
+                    print "New payload loaded."
+            except Exception, e:
+                print '[Error]: ', e
+            finally:
+                return
+
+
+        #try .py
         try:
             _temp = __import__('payloads.' + name, globals(), locals(), fromlist=['Payload'])
             Payload = _temp.Payload
@@ -182,8 +209,9 @@ class ui(cmd.Cmd):
             c = raw_input(">Payload info:\n" + pay.info + "\nAre you sure to use the payload?(y/n):(y)")
             if not c or c[0] != 'n':
                 exp.payload = pay.data
+            print "New payload loaded."
         except Exception, e:
-            print e
+            print '[Error]: ', e
 
     def complete_usepay(self, text, line, begidx, endidx):
         return [i for i in payload_list if i.startswith(text)]
@@ -479,6 +507,19 @@ class ui(cmd.Cmd):
         if not text: return exp.options.keys()
         return [i for i in exp.options.keys() if i.startswith(text)]
 
+    def do_tool(self,name):
+        '''Call a tool.
+        format: tool name'''
+        try:
+            _temp = __import__('misc.' + name, globals(), locals(), fromlist=['run'])
+            tool = _temp.run
+            tool()
+        except Exception, e:
+            print '[Error]:', e
+
+    def complete_tool(self, text, line, begidx, endidx):
+        return [i for i in misc_list if i.startswith(text)]
+
     def do_gdb(self, args):
         '''Open an gdb in a new terminal.(Use '!gdb' will fall into it.)'''
         gdb()
@@ -545,6 +586,8 @@ class ui(cmd.Cmd):
 exploit_list = []
 vulnerability_list = []
 payload_list = []
+misc_list = []
+
 # exp & vul & payload using
 exp = []
 vul = []
@@ -559,8 +602,9 @@ VRLui = ui()
 for attr in ['do_list', 'do_r', 'do_cmdenvironment', 'do_history', 'do_hi', 'do_save',
              'do_pause', 'do_ed', 'do_edit', 'do_EOF', 'do_eof', 'do_li', 'do_l', 'do_quit']:
     if hasattr(cmd.Cmd, attr): delattr(cmd.Cmd, attr)
+if hasattr(VRLui,'colorize'):
+    VRLui.prompt = VRLui.colorize(VRLui.colorize(VRLui.prompt, 'bold'), 'cyan')
 
 VRLui.do_reload('')
-VRLui.prompt = VRLui.colorize(VRLui.colorize(VRLui.prompt, 'bold'), 'cyan')
 VRLui.cmdloop()
 
