@@ -305,6 +305,7 @@ class ui(cmd.Cmd):
             sys.path.append(vul_path)
             vul.run()
             sys.path.remove(vul_path)
+            os.chdir(root_path)
             print 'Script Finished.'
         else:
             print '[Error]: No vulnerability using.'
@@ -318,6 +319,7 @@ class ui(cmd.Cmd):
             sys.path.append(exp_path)
             exp.run()
             sys.path.remove(exp_path)
+            os.chdir(root_path)
             print 'Script Finished.'
         else:
             print '[Error]: No exploit using.'
@@ -549,6 +551,7 @@ class ui(cmd.Cmd):
             if len(file_pids) > 1:
                 print '[Warring]: More than one process found, attach max pid: %d' % max_pid[1]
             gdb(file_name=max_pid[0], pid=max_pid[1], path=_path)
+        os.chdir(root_path)
 
     def do_aslr(self, line):
         '''Check status/Turn on/Turn off ASLR of system.
