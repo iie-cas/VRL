@@ -1,29 +1,52 @@
-
-#include<stdio.h>
+//gcc -fno-stack-protector -z execstack -g -o code_injection ggtest.c
+//gcc -fno-stack-protector -g -o borrowed_code_chunks ggtest.c -ldl
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <dlfcn.h>
 #include<sys/socket.h>
-#include<unistd.h>
 #include<string.h>
-#include<stdlib.h>
 #include<sys/types.h>
 #include<arpa/inet.h>
+
 #define MAXSIZE 1024
 
-long long int testVul(char *buff)
+long long int systemaddr()
 {
-	char str[10];
-	strcpy(str, buff);
+  char buf[128];
+  long long int ans;
+  void* handle = dlopen("libc.so.6", RTLD_LAZY);
+  ans = (long long int)dlsym(handle, "system");
+  return ans;
+  //sprintf(buff,"%016LX\n\0",dlsym(handle,"system"));
+  //m=send(connfd, buff, MAXSIZE, 0);
+}
+
+long long int testVul(int connfd)
+{
+        char str[10];
+        recv(connfd, str, MAXSIZE, 0);
+	//code injection
 	__asm__("movq %rbp, %rax");
 	__asm__("leave");
 	__asm__("ret");
-	//return;
+	
+	/*// code reuse
+       
+	long long int ans;
+	ans=systemaddr();
+	return ans;*/
+        
+	  
+	
 }
 
 
 int main(int argc,char *argv[])
 {
 	int listenfd, connfd;
-	long long int add;
 	struct sockaddr_in servaddr;
+	long long int add;
 	char buff[MAXSIZE];
 	listenfd = socket(AF_INET, SOCK_STREAM, 0);
 	if(listenfd==-1)
@@ -62,14 +85,13 @@ int main(int argc,char *argv[])
 			exit(1);
 		}
 		printf("wating for data...\n");
-		int n,m;
-		while((n=recv(connfd, buff, MAXSIZE, 0))>0)
-		{
-			buff[n] = '\0';
-			add = testVul(buff);
+        int m;
+		
+		while(1){
+			add = testVul(connfd);
 			sprintf(buff, "%016LX\n", add);
 			m=send(connfd, buff, MAXSIZE, 0);
-		}
+                } 
 		close(connfd);
 	}
 	close(listenfd);
