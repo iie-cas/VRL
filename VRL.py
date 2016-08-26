@@ -1,5 +1,4 @@
-
-#! /usr/bin/python
+# ! /usr/bin/python
 # coding:utf-8
 
 import sys
@@ -12,6 +11,7 @@ except ImportError:
     import cmd
 
 from modules.script_tools import *
+
 
 class ui(cmd.Cmd):
     prompt = 'VRL > '
@@ -37,8 +37,10 @@ class ui(cmd.Cmd):
                 [a, b] = os.path.splitext(str(i))
                 if b in ['.py', '.json']:
                     if a != '__init__':
-                        if type == 'misc': misc_list.append(a)
-                        else: payload_list.append(a)
+                        if type == 'misc':
+                            misc_list.append(a)
+                        else:
+                            payload_list.append(a)
 
     def do_guide(self, line):
         '''Show a simple guide.'''
@@ -61,12 +63,12 @@ class ui(cmd.Cmd):
         '''Show all exploits|vulnerabilities|payload|options
         format: list exploit|vulnerabilities|payload|options (e|v|p|o for short.)'''
         if type:
-            path = {'exploits': exploit_list, 'vulnerabilities': vulnerability_list,\
+            path = {'exploits': exploit_list, 'vulnerabilities': vulnerability_list, \
                     'payloads': payload_list, 'tools': misc_list}
             _cmd = path.keys()
             _cmd.append('options')
             for i in _cmd:
-                if i.startswith(type): type=i
+                if i.startswith(type): type = i
             if type in path.keys():
                 print_line('')
                 for i in path[type]:
@@ -175,18 +177,20 @@ class ui(cmd.Cmd):
                 print '[Error]: Current exploit does not support change payload.'
                 return
         # load payload
-        #try .json first
-        if name+'.json' in str(os.listdir('./payloads')):
+        # try .json first
+        if name + '.json' in str(os.listdir('./payloads')):
             try:
-                with open('./payloads/'+name+'.json', 'r') as f:
+                with open('./payloads/' + name + '.json', 'r') as f:
                     json_data = json.load(f)
+
                     class _tmp_pay(object):
                         info = ''
                         data = ''
+
                     pay = _tmp_pay()
                     pay.info = json_data['info']
-                    pay.data = eval("str('"+json_data['data']+"')")     #This is unsafe, and ugly.
-                    print pay.info                                      #who can tell me a better way? by author
+                    pay.data = eval("str('" + json_data['data'] + "')")  # This is unsafe, and ugly.
+                    print pay.info  # who can tell me a better way? by author
                     c = raw_input(">Payload info:\n" + pay.info + "\nAre you sure to use the payload?(y/n):(y)")
                     if not c or c[0] != 'n':
                         exp.payload = pay.data
@@ -196,8 +200,7 @@ class ui(cmd.Cmd):
             finally:
                 return
 
-
-        #try .py
+        # try .py
         try:
             _temp = __import__('payloads.' + name, globals(), locals(), fromlist=['Payload'])
             Payload = _temp.Payload
@@ -256,12 +259,12 @@ class ui(cmd.Cmd):
 
     def _check_before_running(self):
         '''Check the options.'''
-        if hasattr(self,'ignore_check_before_running'): return True
+        if hasattr(self, 'ignore_check_before_running'): return True
         if exp and vul:
             for _key in vul.options.keys():
                 if _key in exp.options.keys():
                     if vul.options[_key] != exp.options[_key]:
-                        _input = raw_input(\
+                        _input = raw_input( \
                             '[Warring]: Options of vulnerability and exploit do not match,\nContinue? y/n:(n)')
                         if _input and _input[0] == 'y':
                             print "[Warring]: Continue, we won't warn you again."
@@ -436,10 +439,10 @@ class ui(cmd.Cmd):
                  if you want to only change one of them, use 'setvul'/'setexp' command.'''
         [key, value] = args.split(' ')[0:2]
         if key in ['e', 'exp']:
-            self.do_setexp(args[len(key)+1:])
+            self.do_setexp(args[len(key) + 1:])
             return
         if key in ['v', 'vul']:
-            self.do_setvul(args[len(key)+1:])
+            self.do_setvul(args[len(key) + 1:])
             return
         suc = False  # found or not
         if vul:
@@ -507,12 +510,13 @@ class ui(cmd.Cmd):
         if not text: return exp.options.keys()
         return [i for i in exp.options.keys() if i.startswith(text)]
 
-    def do_tool(self,name):
+    def do_tool(self, name):
         '''Call a tool.
         format: tool name'''
         try:
             _temp = __import__('misc.' + name, globals(), locals(), fromlist=['run'])
             tool = _temp.run
+            os.chdir(root_path)
             tool()
         except Exception, e:
             print '[Error]:', e
@@ -528,8 +532,8 @@ class ui(cmd.Cmd):
         '''Use gdb to attach the program automatically(ELF only).
         format: attach          attach the vulnerability.
                 attach  e/v     attach the exploit/vulnerability.'''
-        file_pids=[]
-        _path =  vul_path
+        file_pids = []
+        _path = vul_path
         if line and line[0] == 'e': _path = exp_path
 
         for i in find_executable_file(_path):
@@ -541,7 +545,7 @@ class ui(cmd.Cmd):
         if not file_pids:
             print '[Error]: Process not found.'
         else:
-            max_pid = max(file_pids,key=lambda x: x[1])
+            max_pid = max(file_pids, key=lambda x: x[1])
             if len(file_pids) > 1:
                 print '[Warring]: More than one process found, attach max pid: %d' % max_pid[1]
             gdb(file_name=max_pid[0], pid=max_pid[1], path=_path)
@@ -550,7 +554,7 @@ class ui(cmd.Cmd):
         '''Check status/Turn on/Turn off ASLR of system.
         Format: aslr status/check/on/off/conservative'''
         if line in ['status', 'check', 'on', 'off', 'conservative']:
-            if line[1] in ['h','t']:
+            if line[1] in ['h', 't']:
                 state = aslr_status()
                 if state == 2:
                     print "ASLR: ON\n"
@@ -582,6 +586,7 @@ class ui(cmd.Cmd):
             return [i for i in ['exp', 'vul'] if i.startswith(text)]
         return []
 
+
 # list of exp & vul & payload
 exploit_list = []
 vulnerability_list = []
@@ -593,6 +598,7 @@ exp = []
 vul = []
 pay = ''
 # path
+root_path = sys.path[0]
 exp_path = sys.path[0]
 vul_path = sys.path[0]
 
@@ -602,9 +608,8 @@ VRLui = ui()
 for attr in ['do_list', 'do_r', 'do_cmdenvironment', 'do_history', 'do_hi', 'do_save',
              'do_pause', 'do_ed', 'do_edit', 'do_EOF', 'do_eof', 'do_li', 'do_l', 'do_quit']:
     if hasattr(cmd.Cmd, attr): delattr(cmd.Cmd, attr)
-if hasattr(VRLui,'colorize'):
+if hasattr(VRLui, 'colorize'):
     VRLui.prompt = VRLui.colorize(VRLui.colorize(VRLui.prompt, 'bold'), 'cyan')
 
 VRLui.do_reload('')
 VRLui.cmdloop()
-
