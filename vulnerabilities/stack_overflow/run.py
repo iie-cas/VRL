@@ -18,7 +18,7 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
                 'aslr': 'False',
                 'allow_stack_exec' : 'True',
                 'port' : '34567'}
-        self.exploit = ['code_injection', 'code_reuse']
+        self.exploit = ['code_injection', 'code_reuse', 'rop']
 
     def run(self):
         aslr_off()
