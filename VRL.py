@@ -112,6 +112,11 @@ Format: usevul vulnerability_name'''
                     for i in vul.exploit:
                         print i
                 print_line('')
+            if exp:
+                print '>Exploit exist, auto_sync options(exp->vul).'
+                for _key in vul.options.keys():
+                    if _key in exp.options.keys():
+                        vul.options[_key] = exp.options[_key]
         except Exception, e:
             print '[Error]:', e
 
@@ -146,15 +151,23 @@ Format: useexp exploit_name'''
                         vul.options[_key] = exp.options[_key]
 
             # load default payload
-            if hasattr(exp, 'payload'):
-                if 'default_payload' in exp.options.keys() and exp.options['default_payload']:
+            if hasattr(exp, 'default_payload'):
+                if (exp.default_payload):
                     print ">Exploit has a default payload,loading..."
-                    _temp = __import__('payloads.' + exp.options['default_payload'], globals(), locals(),
+                    _temp = __import__('payloads.' + exp.default_payload, globals(), locals(),
                                        fromlist=['Payload'])
                     Payload = _temp.Payload
                     pay = Payload()
                     exp.payload = pay.data
-                    print ">Default payload: '" + exp.options["default_payload"] + "' loaded."
+                    print ">Default payload: '" + exp.default_payload + "' loaded."
+            # print supported payloads
+                if hasattr(exp, 'supported_payload'):
+                    if type(exp.supported_payload) == str:
+                        print exp.supported_payload
+                    elif type(exp.supported_payload) == list:
+                        for i in exp.supported_payload:
+                            print i
+                print_line('')
         except Exception, e:
             print '[Error]:', e
 
@@ -203,8 +216,8 @@ Format: usepay payload_name'''
             Payload = _temp.Payload
             pay = Payload()
             print 'Payload Loaded.'
-            if hasattr(exp, 'payload_info'):
-                print '>Payload requirements of the exploit:\n', exp.payload_info
+            if hasattr(exp, 'payload_requirement'):
+                print '>Payload requirements of the exploit:\n', exp.payload_requirement
 
             c = raw_input(">Payload info:\n" + pay.info + "\nAre you sure to use the payload?(y/n):(y)")
             if not c or c[0] != 'n':
@@ -597,13 +610,14 @@ payload_list = []
 misc_list = []
 
 # exp & vul & payload using
-exp = []
-vul = []
-pay = ''
+exp = []        # will be replaced by an Exploit instance.
+vul = []        # will be replaced by a Vulnerability instance.
+pay = ''        # only be replaced by payload data.
+
 # path
-root_path = sys.path[0]
-exp_path = sys.path[0]
-vul_path = sys.path[0]
+root_path = sys.path[0]         # not change
+exp_path = sys.path[0]          # change to exploit path
+vul_path = sys.path[0]          # change to vulnerability path
 
 VRLui = ui()
 
