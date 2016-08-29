@@ -604,6 +604,7 @@ Format: aslr status/check/on/off/conservative'''
             return ['exp', 'vul']
 
 
+
 # list of exp & vul & payload
 exploit_list = []
 vulnerability_list = []
