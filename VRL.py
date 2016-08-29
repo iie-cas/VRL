@@ -200,8 +200,9 @@ Format: usepay payload_name'''
                     pay = _tmp_pay()
                     pay.info = json_data['info']
                     pay.data = eval("str('" + json_data['data'] + "')")  # This is unsafe, and ugly.
+                    print ">Payload info:"
                     print pay.info  # who can tell me a better way? by author
-                    c = raw_input(">Payload info:\n" + pay.info + "\nAre you sure to use the payload?(y/n):(y)")
+                    c = raw_input("Are you sure to use the payload?(y/n):(y)")
                     if not c or c[0] != 'n':
                         exp.payload = pay.data
                     print "New payload loaded."
@@ -601,6 +602,7 @@ Format: aslr status/check/on/off/conservative'''
             return [i for i in ['exp', 'vul'] if i.startswith(text)]
         else:
             return ['exp', 'vul']
+
 
 
 # list of exp & vul & payload

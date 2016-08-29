@@ -11,7 +11,7 @@ class Payload(object):
     def __init__(self):
         self.info = \
 '''abstract : 这段shellcode的作用是读出/etc/passwd的内容
-architecture : x86
+architecture : x64
 length : 84
 NULL byte: no.'''
         self.data = shellcode
