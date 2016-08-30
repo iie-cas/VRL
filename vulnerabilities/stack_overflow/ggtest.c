@@ -1,5 +1,6 @@
-//gcc -fno-stack-protector -z execstack -g -o code_injection ggtest.c
-//gcc -fno-stack-protector -g -o borrowed_code_chunks ggtest.c -ldl
+//gcc -fno-stack-protector -z execstack -g -o code_injection ggtest.c aslr off
+//gcc -fno-stack-protector -g -o code_reuse ggtest.c -ldl aslr on
+//gcc -fno-stack-protector -g -o code_reuse_jop ggtest.c -ldl  aslr off
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,6 +12,7 @@
 
 #define MAXSIZE 1024
 
+/*get system function address*/
 long long int systemaddr()
 {
   char buf[128];
@@ -22,22 +24,37 @@ long long int systemaddr()
   //m=send(connfd, buff, MAXSIZE, 0);
 }
 
+/*vulnerability function*/
 long long int testVul(int connfd)
 {
         char str[10];
         recv(connfd, str, MAXSIZE, 0);
-	//code injection
+	/*//code injection, return rbp
 	__asm__("movq %rbp, %rax");
 	__asm__("leave");
-	__asm__("ret");
+	__asm__("ret");*/
 	
-	/*// code reuse
-       
+	/*// code reuse rop, borrowed code chunks, return system function address 
 	long long int ans;
 	ans=systemaddr();
 	return ans;*/
-        
-	  
+
+        //code reuse jop
+      if(str[0]=='p'){//generate gadget, non-execution
+        __asm__("pop %rcx");
+        __asm__("pop %rax");
+	__asm__("pop %rbx");
+	__asm__("add $0x08,%rbx");
+        __asm__("jmpq *(%rbx)");
+      }
+      if(str[0]=='a'){//the first receive,return system function address 
+	long long int ans;
+	ans=systemaddr();
+	return ans;}
+      if(str[0]=='b'){//the second receive,return rbp
+         __asm__("movq %rbp, %rax");
+	 __asm__("leave");
+	 __asm__("ret");}
 	
 }
 
@@ -88,9 +105,9 @@ int main(int argc,char *argv[])
         int m;
 		
 		while(1){
-			add = testVul(connfd);
-			sprintf(buff, "%016LX\n", add);
-			m=send(connfd, buff, MAXSIZE, 0);
+                        add = testVul(connfd); //call vulnerability function, get useful value
+			sprintf(buff, "%016LX\n", add);//convert to hexadecimal
+			m=send(connfd, buff, 16, 0);//send to exploit program
                 } 
 		close(connfd);
 	}

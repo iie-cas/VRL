@@ -9,16 +9,15 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
     def __init__(self):
         '''Add information of your vulnerability here'''
         self.name = 'stack_overflow'
-        self.info = '''A simple server with stack overflow vulnerability.
-        In current version, ASLR should always OFF, script will ignore it.
-        When allow_stack_exec = True, use code_injection exploit.
-        When allow_stack_exec = False, use code-reuse exploit.
-        '''
+        self.info = '''Vulnerability Name : stack_overflow
+                       Vulnerability abstract : A simple server with stack overflow vulnerability
+                       Author : guoyingjie'''
+
         self.options={
-                'aslr': 'False',
+                'aslr': 'off',
                 'allow_stack_exec' : 'True',
                 'port' : '34567'}
-        self.exploit = ['code_injection', 'code_reuse', 'rop']
+        self.exploit = ['exploits/code_injection', 'exploits/borrow_code_chunks', 'exploits/rop', 'exploits/jop']
 
     def run(self):
         aslr_off()
