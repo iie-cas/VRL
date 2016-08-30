@@ -10,14 +10,14 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
         '''Add information of your vulnerability here'''
         self.name = 'stack_overflow'
         self.info = '''Vulnerability Name : stack_overflow
-                       Vulnerability abstract : A simple server with stack overflow vulnerability
-                       Author : guoyingjie'''
+Vulnerability abstract : A simple server with stack overflow vulnerability
+Author : guoyingjie'''
 
         self.options={
                 'aslr': 'off',
                 'allow_stack_exec' : 'True',
                 'port' : '34567'}
-        self.exploit = ['exploits/code_injection', 'exploits/borrow_code_chunks', 'exploits/rop', 'exploits/jop']
+        self.exploit = ['code_injection', 'borrow_code_chunks', 'rop', 'jop']
 
     def run(self):
         aslr_off()
