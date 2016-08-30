@@ -49,8 +49,9 @@ class link_payload(cmd.Cmd):
                     pay = _tmp_pay()
                     pay.info = json_data['info']
                     pay.data = eval("str('" + json_data['data'] + "')")
+                    print ">Payload info:"
                     print pay.info
-                    c = raw_input(">Payload info:\n" + pay.info + "\nAre you sure to add the payload?(y/n):(y)")
+                    c = raw_input("Are you sure to add the payload?(y/n):(y)")
                     if not c or c[0] != 'n':
                         self.info += name + ' '
                         self.data += pay.data
