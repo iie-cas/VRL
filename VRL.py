@@ -153,13 +153,36 @@ Format: useexp exploit_name'''
             # load default payload
             if hasattr(exp, 'default_payload'):
                 if (exp.default_payload):
-                    print ">Exploit has a default payload,loading..."
-                    _temp = __import__('payloads.' + exp.default_payload, globals(), locals(),
-                                       fromlist=['Payload'])
-                    Payload = _temp.Payload
-                    pay = Payload()
-                    exp.payload = pay.data
-                    print ">Default payload: '" + exp.default_payload + "' loaded."
+                    exp.payload=''
+                    print ">Exploit has a default payload, loading..."
+
+                    # try .json
+                    if exp.default_payload + '.json' in str(os.listdir('./payloads')):
+                        try:
+                            with open('./payloads/' + exp.default_payload + '.json', 'r') as f:
+                                json_data = json.load(f)
+                                class _tmp_pay(object):
+                                    info = ''
+                                    data = ''
+                                pay = _tmp_pay()
+                                pay.data = eval("str('" + json_data['data'] + "')")  # This is unsafe, and ugly.
+                                exp.payload = pay.data
+                                print ">Default payload: '" + exp.default_payload+ "' loaded."
+                        except Exception, e:
+                            print '[Error]: ', e
+                            return 0
+
+                    # try .py
+                    else:
+                        try:
+                            _temp = __import__('payloads.' + exp.default_payload, globals(), locals(),
+                                               fromlist=['Payload'])
+                            Payload = _temp.Payload
+                            pay = Payload()
+                            exp.payload = pay.data
+                            print ">Default payload: '" + exp.default_payload+ "' loaded."
+                        except Exception, e:
+                            print '[Error]: ', e
             # print supported payloads
                 if hasattr(exp, 'supported_payload'):
                     if type(exp.supported_payload) == str:
