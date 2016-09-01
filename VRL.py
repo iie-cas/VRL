@@ -155,6 +155,8 @@ Format: useexp exploit_name'''
                 if (exp.default_payload):
                     exp.payload=''
                     print ">Exploit has a default payload, loading..."
+
+                    # try .json
                     if exp.default_payload + '.json' in str(os.listdir('./payloads')):
                         try:
                             with open('./payloads/' + exp.default_payload + '.json', 'r') as f:
