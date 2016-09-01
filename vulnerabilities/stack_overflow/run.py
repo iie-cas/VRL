@@ -1,7 +1,7 @@
 #! /usr/bin/python
 #coding:utf-8
 import sys, os
-sys.path.append("../..")
+sys.path.append(os.path.abspath("../.."))
 from modules import vulnerability
 from modules.script_tools import *
 
