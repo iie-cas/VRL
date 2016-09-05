@@ -17,7 +17,7 @@ Author : guoyingjie'''
                 'aslr': 'off',
                 'allow_stack_exec' : 'True',
                 'port' : '34567'}
-        self.exploit = ['code_injection', 'borrow_code_chunks', 'rop', 'jop']
+        self.exploit = ['code_injection', 'borrow_code_chunks', 'rop', 'jop', 'rop_shellcode']
 
     def run(self):
         aslr_off()
