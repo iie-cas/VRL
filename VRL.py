@@ -12,11 +12,39 @@ except ImportError:
 
 from modules.script_tools import *
 
+def update_prompt(f):
+    def fn(*args, **kw):
+        sys.stdout.flush()
+        global exp, vul, pay
+        ans = f(*args, **kw)
+        _pro = colorize('VRL ','magenta')
+        if vul:
+            _pro += colorize('V ','green')
+        else :
+            _pro += colorize('V ','black')
+        if exp:
+            _pro += colorize('E ','green')
+        else :
+            _pro += colorize('E ','black')
+        if exp:
+            if hasattr(exp, 'default_payload'):
+                if pay:
+                    _pro += colorize('P','green')
+                else:
+                    _pro += colorize('P','black')
+            else :
+                _pro += colorize('P','blue')
+        else:
+            _pro += colorize('P','black')
+        VRLui.prompt = colorize(_pro+'>','bold')
+        sys.stdout.flush()
+        return ans
+    return fn
 
 class ui(cmd.Cmd):
-    prompt = 'VRL > '
     intro = 'Welcome to VRL'
 
+    @update_prompt
     def do_reload(self, line):
         '''Reload all exploits,vulnerabilities,payloads,etc.
 When VRL started, loading is done.
@@ -93,6 +121,7 @@ Format: show exploit|vulnerabilities|payload|options|tools
         args = ['options', 'payloads', 'exploits', 'vulnerabilities', 'tools']
         return [i for i in args if i.startswith(text)]
 
+    @update_prompt
     def do_usevul(self, name):
         '''Use a vulnerability
 Format: usevul vulnerability_name'''
@@ -118,11 +147,12 @@ Format: usevul vulnerability_name'''
                     if _key in exp.options.keys():
                         vul.options[_key] = exp.options[_key]
         except Exception, e:
-            print '[Error]:', e
+            print colorize('[Error]: ','red'), e
 
     def complete_usevul(self, text, line, begidx, endidx):
         return [i for i in vulnerability_list if i.startswith(text)]
 
+    @update_prompt
     def do_useexp(self, name):
         '''Use an exploit
 Format: useexp exploit_name'''
@@ -169,7 +199,7 @@ Format: useexp exploit_name'''
                                 exp.payload = pay.data
                                 print ">Default payload: '" + exp.default_payload+ "' loaded."
                         except Exception, e:
-                            print '[Error]: ', e
+                            print colorize('[Error]:','red'), e
                             return 0
 
                     # try .py
@@ -192,22 +222,23 @@ Format: useexp exploit_name'''
                             print i
                 print_line('')
         except Exception, e:
-            print '[Error]:', e
+            print colorize('[Error]: ','red'), e
 
     def complete_useexp(self, text, line, begidx, endidx):
         return [i for i in exploit_list if i.startswith(text)]
 
+    @update_prompt
     def do_usepay(self, name):
         '''Use a payload
 Format: usepay payload_name'''
         global pay
         # check
         if not exp:
-            print '[Error]: You should use an exploit before use a payload.'
+            print colorize('[Error]: ','red'), 'You should use an exploit before use a payload.'
             return
         else:
-            if not hasattr(exp, 'payload') and exp.payload:
-                print '[Error]: Current exploit does not support change payload.'
+            if not hasattr(exp, 'default_payload'):
+                print colorize('[Error]: ','red'), 'Current exploit does not support change payload.'
                 return
         # load payload
         # try .json first
@@ -230,7 +261,7 @@ Format: usepay payload_name'''
                         exp.payload = pay.data
                     print "New payload loaded."
             except Exception, e:
-                print '[Error]: ', e
+                print colorize('[Error]: ','red'), e
             finally:
                 return
 
@@ -248,11 +279,12 @@ Format: usepay payload_name'''
                 exp.payload = pay.data
             print "New payload loaded."
         except Exception, e:
-            print '[Error]: ', e
+            print colorize('[Error]: ','red'), e
 
     def complete_usepay(self, text, line, begidx, endidx):
         return [i for i in payload_list if i.startswith(text)]
 
+    @update_prompt
     def do_use(self, name):
         '''Try to use the vulnerability and exploit with the same name.
 Format: use name
@@ -298,10 +330,10 @@ Notice: use exp/e ... equals useexp ...
             for _key in vul.options.keys():
                 if _key in exp.options.keys():
                     if vul.options[_key] != exp.options[_key]:
-                        _input = raw_input( \
-                            '[Warring]: Options of vulnerability and exploit do not match,\nContinue? y/n:(n)')
+                        _input = raw_input(colorize('[Warring]: ','yellow')+\
+                                           'Options of vulnerability and exploit do not match,\nContinue? y/n:(n)')
                         if _input and _input[0] == 'y':
-                            print "[Warring]: Continue, we won't warn you again."
+                            print "Continue, we won't warn you again."
                             self.ignore_check_before_running = True
                         else:
                             return False
@@ -321,7 +353,7 @@ Mention: run exp/e equals runexp
         print 'Quick running...'
         if not vul and not exp:
             if not name:
-                print "[Error]: No vulnerability or exploit using. Use one before running."
+                print colorize('[Error]: ','red'), 'No vulnerability or exploit using. Use one before running.'
                 return
         print "Try to run the vulnerability."
         self.do_runvul('')
@@ -365,9 +397,9 @@ Mention: run exp/e equals runexp
             if hasattr(vul, 'stop'):
                 vul.stop()
             else:
-                print '[Error]: This vulnerability cannot stop.'
+                print colorize('[Error]: ','red'), 'This vulnerability cannot stop.'
         else:
-            print '[Error]: No vulnerability using.'
+            print colorize('[Error]: ','red'), 'No vulnerability using.'
 
     def do_stopexp(self, line):
         '''Stop the exploit using'''
@@ -375,9 +407,9 @@ Mention: run exp/e equals runexp
             if hasattr(exp, 'stop'):
                 exp.stop()
             else:
-                print '[Error]: This exploit cannot stop.'
+                print colorize('[Error]: ','red'), 'This exploit cannot stop.'
         else:
-            print '[Error]: No exploit using.'
+            print colorize('[Error]: ','red'), 'No exploit using.'
 
     def do_stop(self, line):
         '''Stop both vulnerability and exploit.
@@ -401,9 +433,9 @@ Notice: stop exp/e equals stopexp
             if hasattr(vul, 'make'):
                 vul.make()
             else:
-                print '[Error]: This vulnerability cannot make.'
+                print colorize('[Error]: ','red'), 'This vulnerability cannot make.'
         else:
-            print '[Error]: No vulnerability using.'
+            print colorize('[Error]: ','red'), 'No vulnerability using.'
 
     def do_makeexp(self, line):
         '''Recompile the exploit using'''
@@ -411,9 +443,9 @@ Notice: stop exp/e equals stopexp
             if hasattr(exp, 'make'):
                 exp.make()
             else:
-                print '[Error]: This exploit cannot make.'
+                print colorize('[Error]: ','red'), 'This exploit cannot make.'
         else:
-            print '[Error]: No exploit using.'
+            print colorize('[Error]: ','red'), 'No exploit using.'
 
     def do_make(self, line):
         '''Recompile both vulnerability and exploit.
@@ -438,9 +470,9 @@ Notice: make exp/e equals makeexp
                 print_line('Vulnerability inFormation:')
                 print vul.info
             else:
-                print '[Error]: This vulnerability has no info.'
+                print colorize('[Error]: ','red'), 'This vulnerability has no info.'
         else:
-            print '[Error]: No vulnerability using.'
+            print colorize('[Error]: ','red'), 'No vulnerability using.'
 
     def do_infoexp(self, line):
         '''Show the inFormation of current Exploit.'''
@@ -449,9 +481,9 @@ Notice: make exp/e equals makeexp
                 print_line('Exploit inFormation:')
                 print exp.info
             else:
-                print '[Error]: This exploit has no info.'
+                print colorize('[Error]: ','red'), 'This exploit has no info.'
         else:
-            print '[Error]: No exploit using.'
+            print colorize('[Error]: ','red'), 'No exploit using.'
 
     def do_info(self, line):
         '''Show inFormation of both vulnerability and exploit.
@@ -495,7 +527,7 @@ Notice: When the vulnerability and exploit share same keys, they will change tog
                     print "Exploit options updated."
                     suc = True
         if not suc:
-            print "[Error]: no such key found."
+            print colorize('[Error]: ','red'), 'No such key found.'
 
     def complete_set(self, text, line, begidx, endidx):
         if begidx == 4:
@@ -522,7 +554,7 @@ Notice: When the vulnerability and exploit share same keys, they will change tog
                     print "Vulnerability options updated."
                     suc = True
         if not suc:
-            print "[Error]: no such key found."
+            print colorize('[Error]: ','red'), 'No such key found.'
 
     def complete_setvul(self, text, line, begidx, endidx):
         if not vul: return []
@@ -540,7 +572,7 @@ Notice: When the vulnerability and exploit share same keys, they will change tog
                     print "Exploit options updated."
                     suc = True
         if not suc:
-            print "[Error]: no such key found."
+            print colorize('[Error]: ','red'), 'No such key found.'
 
     def complete_setexp(self, text, line, begidx, endidx):
         if not exp: return []
@@ -580,11 +612,11 @@ Format: attach          attach the vulnerability.
                     file_pids.extend([(i, j)])
 
         if not file_pids:
-            print '[Error]: Process not found.'
+            print colorize('[Error]: ','red'), 'Process not found.'
         else:
             max_pid = max(file_pids, key=lambda x: x[1])
             if len(file_pids) > 1:
-                print '[Warring]: More than one process found, attach max pid: %d' % max_pid[1]
+                print colorize('[Warring]: ','yellow')+'More than one process found, attach max pid: %d' % max_pid[1]
             gdb(file_name=max_pid[0], pid=max_pid[1], path=_path)
         os.chdir(root_path)
 
@@ -610,7 +642,7 @@ Format: aslr status/check/on/off/conservative'''
                 aslr_conservative()
 
         else:
-            print("[Error]: Wrong Format.")
+            print colorize('[Error]: ','red'), 'Wrong Format.'
             self.do_help('aslr')
 
     def complete_aslr(self, text, line, begidx, endidx):
@@ -650,8 +682,6 @@ VRLui = ui()
 for attr in ['do_list', 'do_r', 'do_cmdenvironment', 'do_history', 'do_hi', 'do_save',
              'do_pause', 'do_ed', 'do_edit', 'do_EOF', 'do_eof', 'do_li', 'do_l', 'do_quit']:
     if hasattr(cmd.Cmd, attr): delattr(cmd.Cmd, attr)
-if hasattr(VRLui, 'colorize'):
-    VRLui.prompt = VRLui.colorize(VRLui.colorize(VRLui.prompt, 'bold'), 'cyan')
 
 VRLui.do_reload('')
 VRLui.cmdloop()

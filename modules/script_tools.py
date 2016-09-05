@@ -100,7 +100,6 @@ def print_line(str, padding='='):
         _output = commands.getoutput('resize')
         columns = int(_output.split(';')[0].split('=')[-1])
     except:
-        print '[Warring]: It seems failed when import "commands".'
         columns = 80
     _length = columns
     _str = str.center(_length,padding)
@@ -143,3 +142,23 @@ def gdb(file_name='',pid=0, path='', sudo=True):
         sys.path.remove(path)
     else:
         os.system(new_terminal_exit(_cmd))
+
+colorcodes =    {'bold':{True:'\x1b[1m',False:'\x1b[22m'},
+                 'cyan':{True:'\x1b[36m',False:'\x1b[39m'},
+                 'blue':{True:'\x1b[34m',False:'\x1b[39m'},
+                 'red':{True:'\x1b[31m',False:'\x1b[39m'},
+                 'magenta':{True:'\x1b[35m',False:'\x1b[39m'},
+                 'green':{True:'\x1b[32m',False:'\x1b[39m'},
+                 'yellow':{True:'\x1b[33m',False:'\x1b[39m'},
+                 'white':{True:'\x1b[37m',False:'\x1b[39m'},
+                 'black':{True:'\x1b[30m',False:'\x1b[39m'},
+                 'underline':{True:'\x1b[4m',False:'\x1b[24m'}}
+def colorize(val, color):
+    '''Given a string (``val``), returns that string wrapped in UNIX-style
+       special characters that turn on (and then off) text color and style.
+       ``color`` should be one of the supported strings (or styles):
+       red/blue/green/cyan/magenta, bold, underline'''
+    if color:
+        return colorcodes[color][True] + val + colorcodes[color][False]
+    return val
+

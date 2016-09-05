@@ -19,9 +19,9 @@ class link_payload(cmd.Cmd):
     prompt = 'Link_Payload > '
     intro = \
         '''
-    This is an easy tool for payload linking.
+    This is an easy tool for payload linking(or save a customized payload).
     Use 'add payload' to add a new payload to your new payload.
-    Use 'make' to link them all.
+    Use 'save' to link them all.
     'q' for quit!'''
     data = str("")
     info = "Linked payload, from:\n"
@@ -75,7 +75,7 @@ class link_payload(cmd.Cmd):
         except Exception, e:
             print '[Error]: ', e
 
-    def do_make(self, line):
+    def do_save(self, line):
         name = raw_input("Enter a new name:")
         if not name:
             print '[Error]: Empty name.'
@@ -99,7 +99,7 @@ class link_payload(cmd.Cmd):
                 print 'New payload saved.'
                 return True
 
-    def complete_add(self, text, line, begidx, endidx):
+    def complete_save(self, text, line, begidx, endidx):
         return [i for i in self.payload_list if i.startswith(text)]
 
 
