@@ -28,7 +28,7 @@ def update_prompt(f):
             _pro += colorize('E ','black')
         if exp:
             if hasattr(exp, 'default_payload'):
-                if vul:
+                if pay:
                     _pro += colorize('P','green')
                 else:
                     _pro += colorize('P','black')
