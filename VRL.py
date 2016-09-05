@@ -26,22 +26,25 @@ def update_prompt(f):
             _pro += colorize('E ','green')
         else :
             _pro += colorize('E ','black')
-        if exp and hasattr(exp, 'default_payload'):
-            if pay:
-                _pro += colorize('P','green')
+        if exp:
+            if hasattr(exp, 'default_payload'):
+                if vul:
+                    _pro += colorize('P','green')
+                else:
+                    _pro += colorize('P','black')
             else :
-                _pro += colorize('P','black')
-        else :
-            _pro += colorize('P','cyan')
+                _pro += colorize('P','blue')
+        else:
+            _pro += colorize('P','black')
         VRLui.prompt = colorize(_pro+'>','bold')
         sys.stdout.flush()
         return ans
     return fn
 
 class ui(cmd.Cmd):
-    prompt = colorize(colorize('VRL ','magenta')+ colorize('V E P','black')+'>','bold')
     intro = 'Welcome to VRL'
 
+    @update_prompt
     def do_reload(self, line):
         '''Reload all exploits,vulnerabilities,payloads,etc.
 When VRL started, loading is done.
