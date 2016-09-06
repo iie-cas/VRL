@@ -35,48 +35,48 @@ def update_prompt(f):
         global exp, vul, pay
         if prompt_colors:
             ans = f(*args, **kw)
-            _pro = colorize('VRL ','magenta')
+            _pro = colorize('VRL ','magenta', prompt=True)
             if vul:
-                _pro += colorize('V ','green')
+                _pro += colorize('V ','green', prompt=True)
             else :
-                _pro += colorize('V ','black')
+                _pro += colorize('V ','black', prompt=True)
             if exp:
-                _pro += colorize('E ','green')
+                _pro += colorize('E ','green', prompt=True)
             else :
-                _pro += colorize('E ','black')
+                _pro += colorize('E ','black', prompt=True)
             if exp:
                 if hasattr(exp, 'default_payload'):
                     if pay:
-                        _pro += colorize('P','green')
+                        _pro += colorize('P','green', prompt=True)
                     else:
-                        _pro += colorize('P','black')
+                        _pro += colorize('P','black', prompt=True)
                 else :
-                    _pro += colorize('P','blue')
+                    _pro += colorize('P','blue', prompt=True)
             else:
-                _pro += colorize('P','black')
-            VRLui.prompt = colorize(_pro+'>','bold')
+                _pro += colorize('P','black', prompt=True)
+            VRLui.prompt = colorize(_pro+'>','bold', prompt=True)
         else:
             ans = f(*args, **kw)
-            _pro = colorize('VRL ','')
+            _pro = 'VRL '
             if vul:
-                _pro += colorize('V ','')
+                _pro += 'V '
             else :
-                _pro += colorize('_ ','')
+                _pro += '_ '
             if exp:
-                _pro += colorize('E ','')
+                _pro += 'E '
             else :
-                _pro += colorize('_ ','')
+                _pro += '_ '
             if exp:
                 if hasattr(exp, 'default_payload'):
                     if pay:
-                        _pro += colorize('P','')
+                        _pro += 'P'
                     else:
-                        _pro += colorize('_','')
+                        _pro += '_'
                 else :
-                    _pro += colorize('X','')
+                    _pro += 'X'
             else:
-                _pro += colorize('_','')
-            VRLui.prompt = colorize(_pro+'>','')
+                _pro += '_'
+            VRLui.prompt = _pro+'>'
         return ans
     return fn
 
@@ -691,6 +691,12 @@ Format: aslr status/check/on/off/conservative'''
         '''Turn off color of prompt'''
         global prompt_colors
         prompt_colors = False
+        update_prompt(lambda: None)()
+
+    def do_coloron(self,line):
+        '''Turn on color of prompt'''
+        global prompt_colors
+        prompt_colors = True
         update_prompt(lambda: None)()
 
     def do_q(self, line):

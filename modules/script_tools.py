@@ -153,12 +153,16 @@ colorcodes =    {'bold':{True:'\x1b[1m',False:'\x1b[22m'},
                  'white':{True:'\x1b[37m',False:'\x1b[39m'},
                  'black':{True:'\x1b[30m',False:'\x1b[39m'},
                  'underline':{True:'\x1b[4m',False:'\x1b[24m'}}
-def colorize(val, color):
+def colorize(val, color, prompt=False):
     '''Given a string (``val``), returns that string wrapped in UNIX-style
        special characters that turn on (and then off) text color and style.
        ``color`` should be one of the supported strings (or styles):
-       red/blue/green/cyan/magenta, bold, underline'''
+       red/blue/green/cyan/magenta/black/white/yellow, bold, underline
+       If used in prompt, prompt=True to fix the display bug.'''
     if color:
-        return colorcodes[color][True] + val + colorcodes[color][False]
+        if prompt:
+            return '\001'+colorcodes[color][True]+'\002' + val + '\001'+colorcodes[color][False]+'\002'
+        else:
+            return colorcodes[color][True]+ val +colorcodes[color][False]
     return val
 
