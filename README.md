@@ -34,6 +34,11 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
 
 ###主要功能
 
++ 状态显示：
+    + 在命令行左端，会显示当前状态。![扩展向导](documents/pic/prompt.jpg)
+    + V表示Vulnerability，E表示Exploit，P表示Payload
+    + 灰色表示没有选择，绿色表示已经选择，蓝色表示当前不可用。
+
 + 列出可用Exploits，Vulnerability，Payload和Tools：
     + `show exploits|vulnerabilities|payloads|tools`
         - 所有参数你可以简写至前几个字母
@@ -98,9 +103,13 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
         + 一些默认的函数，例如`exit`, `!command`执行bash指令等。
 
 
-## 扩展方法
+## 扩展方法和其他
 
 添加新的Exploit，Vulnerability，Payload和工具，请参考[扩展向导](documents/扩展向导.md)
+
+已知bug请参考[bugs](documents/bugs.md)
+
+FAQ:[FAQ](documents/FAQ.md)
 
 ---
 

@@ -1,6 +1,6 @@
 #! /usr/bin/python
 # coding:utf-8
-
+import functools
 import sys
 import os
 import json
@@ -12,39 +12,81 @@ except ImportError:
 
 from modules.script_tools import *
 
-def update_prompt(f):
-    def fn(*args, **kw):
-        sys.stdout.flush()
-        global exp, vul, pay
-        ans = f(*args, **kw)
-        _pro = colorize('VRL ','magenta')
-        if vul:
-            _pro += colorize('V ','green')
-        else :
-            _pro += colorize('V ','black')
-        if exp:
-            _pro += colorize('E ','green')
-        else :
-            _pro += colorize('E ','black')
-        if exp:
-            if hasattr(exp, 'default_payload'):
-                if pay:
-                    _pro += colorize('P','green')
-                else:
-                    _pro += colorize('P','black')
-            else :
-                _pro += colorize('P','blue')
-        else:
-            _pro += colorize('P','black')
-        VRLui.prompt = colorize(_pro+'>','bold')
-        sys.stdout.flush()
-        return ans
-    return fn
+# list of exp & vul & payload
+exploit_list = []
+vulnerability_list = []
+payload_list = []
+misc_list = []
+
+# exp & vul & payload using
+exp = []        # will be replaced by an Exploit instance.
+vul = []        # will be replaced by a Vulnerability instance.
+pay = ''        # only be replaced by payload data.
+
+# path
+root_path = sys.path[0]         # not change
+exp_path = sys.path[0]          # change to exploit path
+vul_path = sys.path[0]          # change to vulnerability path
+
+#prompt color
+prompt_colors = True
 
 class ui(cmd.Cmd):
     intro = 'Welcome to VRL'
 
-    @update_prompt
+    def _update_prompt(f):
+        @functools.wraps(f)
+        def fn(*args, **kw):
+            self = args[0]
+            global exp, vul, pay
+            if prompt_colors:
+                ans = f(*args, **kw)
+                _pro = colorize('VRL ','magenta', prompt=True)
+                if vul:
+                    _pro += colorize('V ','green', prompt=True)
+                else :
+                    _pro += colorize('V ','black', prompt=True)
+                if exp:
+                    _pro += colorize('E ','green', prompt=True)
+                else :
+                    _pro += colorize('E ','black', prompt=True)
+                if exp:
+                    if hasattr(exp, 'default_payload'):
+                        if pay:
+                            _pro += colorize('P','green', prompt=True)
+                        else:
+                            _pro += colorize('P','black', prompt=True)
+                    else :
+                        _pro += colorize('P','blue', prompt=True)
+                else:
+                    _pro += colorize('P','black', prompt=True)
+                self.prompt = colorize(_pro+'>','bold', prompt=True)
+            else:
+                ans = f(*args, **kw)
+                _pro = 'VRL '
+                if vul:
+                    _pro += 'V '
+                else :
+                    _pro += '_ '
+                if exp:
+                    _pro += 'E '
+                else :
+                    _pro += '_ '
+                if exp:
+                    if hasattr(exp, 'default_payload'):
+                        if pay:
+                            _pro += 'P'
+                        else:
+                            _pro += '_'
+                    else :
+                        _pro += 'X'
+                else:
+                    _pro += '_'
+                self.prompt = _pro+'>'
+            return ans
+        return fn
+
+    @_update_prompt
     def do_reload(self, line):
         '''Reload all exploits,vulnerabilities,payloads,etc.
 When VRL started, loading is done.
@@ -121,7 +163,7 @@ Format: show exploit|vulnerabilities|payload|options|tools
         args = ['options', 'payloads', 'exploits', 'vulnerabilities', 'tools']
         return [i for i in args if i.startswith(text)]
 
-    @update_prompt
+    @_update_prompt
     def do_usevul(self, name):
         '''Use a vulnerability
 Format: usevul vulnerability_name'''
@@ -152,7 +194,7 @@ Format: usevul vulnerability_name'''
     def complete_usevul(self, text, line, begidx, endidx):
         return [i for i in vulnerability_list if i.startswith(text)]
 
-    @update_prompt
+    @_update_prompt
     def do_useexp(self, name):
         '''Use an exploit
 Format: useexp exploit_name'''
@@ -227,7 +269,7 @@ Format: useexp exploit_name'''
     def complete_useexp(self, text, line, begidx, endidx):
         return [i for i in exploit_list if i.startswith(text)]
 
-    @update_prompt
+    @_update_prompt
     def do_usepay(self, name):
         '''Use a payload
 Format: usepay payload_name'''
@@ -284,7 +326,7 @@ Format: usepay payload_name'''
     def complete_usepay(self, text, line, begidx, endidx):
         return [i for i in payload_list if i.startswith(text)]
 
-    @update_prompt
+    @_update_prompt
     def do_use(self, name):
         '''Try to use the vulnerability and exploit with the same name.
 Format: use name
@@ -648,6 +690,22 @@ Format: aslr status/check/on/off/conservative'''
     def complete_aslr(self, text, line, begidx, endidx):
         return [i for i in ['status', 'check', 'on', 'off', 'conservative'] if i.startswith(text)]
 
+    def do_coloroff(self,line):
+        '''Turn off color of prompt'''
+        global prompt_colors
+        prompt_colors = False
+        self._refresh_prompt()
+
+    def do_coloron(self,line):
+        '''Turn on color of prompt'''
+        global prompt_colors
+        prompt_colors = True
+        self._refresh_prompt()
+
+    @_update_prompt
+    def _refresh_prompt(self):
+        return
+
     def do_q(self, line):
         '''Quit VRL.'''
         return True
@@ -657,24 +715,6 @@ Format: aslr status/check/on/off/conservative'''
             return [i for i in ['exp', 'vul'] if i.startswith(text)]
         else:
             return ['exp', 'vul']
-
-
-
-# list of exp & vul & payload
-exploit_list = []
-vulnerability_list = []
-payload_list = []
-misc_list = []
-
-# exp & vul & payload using
-exp = []        # will be replaced by an Exploit instance.
-vul = []        # will be replaced by a Vulnerability instance.
-pay = ''        # only be replaced by payload data.
-
-# path
-root_path = sys.path[0]         # not change
-exp_path = sys.path[0]          # change to exploit path
-vul_path = sys.path[0]          # change to vulnerability path
 
 VRLui = ui()
 
