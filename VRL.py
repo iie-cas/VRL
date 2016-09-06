@@ -12,32 +12,34 @@ except ImportError:
 
 from modules.script_tools import *
 
+colors = True
 def update_prompt(f):
+    global colors
     def fn(*args, **kw):
-        sys.stdout.flush()
-        global exp, vul, pay
         ans = f(*args, **kw)
-        _pro = colorize('VRL ','magenta')
-        if vul:
-            _pro += colorize('V ','green')
-        else :
-            _pro += colorize('V ','black')
-        if exp:
-            _pro += colorize('E ','green')
-        else :
-            _pro += colorize('E ','black')
-        if exp:
-            if hasattr(exp, 'default_payload'):
-                if pay:
-                    _pro += colorize('P','green')
-                else:
-                    _pro += colorize('P','black')
+        if colors:
+            global exp, vul, pay
+            _pro = colorize('VRL ','magenta')
+            if vul:
+                _pro += colorize('V ','green')
             else :
-                _pro += colorize('P','blue')
-        else:
-            _pro += colorize('P','black')
-        VRLui.prompt = colorize(_pro+'>','bold')
-        sys.stdout.flush()
+                _pro += colorize('V ','black')
+            if exp:
+                _pro += colorize('E ','green')
+            else :
+                _pro += colorize('E ','black')
+            if exp:
+                if hasattr(exp, 'default_payload'):
+                    if pay:
+                        _pro += colorize('P','green')
+                    else:
+                        _pro += colorize('P','black')
+                else :
+                    _pro += colorize('P','blue')
+            else:
+                _pro += colorize('P','black')
+            VRLui.prompt = colorize(_pro+'>','bold')
+            sys.stdout.flush()
         return ans
     return fn
 
@@ -647,6 +649,12 @@ Format: aslr status/check/on/off/conservative'''
 
     def complete_aslr(self, text, line, begidx, endidx):
         return [i for i in ['status', 'check', 'on', 'off', 'conservative'] if i.startswith(text)]
+
+    def do_coloroff(self,line):
+        '''Turn off color'''
+        global colors
+        colors = False
+        self.prompt = 'VRL >'
 
     def do_q(self, line):
         '''Quit VRL.'''
