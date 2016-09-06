@@ -12,13 +12,29 @@ except ImportError:
 
 from modules.script_tools import *
 
-colors = True
+# list of exp & vul & payload
+exploit_list = []
+vulnerability_list = []
+payload_list = []
+misc_list = []
+
+# exp & vul & payload using
+exp = []        # will be replaced by an Exploit instance.
+vul = []        # will be replaced by a Vulnerability instance.
+pay = ''        # only be replaced by payload data.
+
+# path
+root_path = sys.path[0]         # not change
+exp_path = sys.path[0]          # change to exploit path
+vul_path = sys.path[0]          # change to vulnerability path
+
+#prompt color
+prompt_colors = True
 def update_prompt(f):
-    global colors
     def fn(*args, **kw):
-        ans = f(*args, **kw)
-        if colors:
-            global exp, vul, pay
+        global exp, vul, pay
+        if prompt_colors:
+            ans = f(*args, **kw)
             _pro = colorize('VRL ','magenta')
             if vul:
                 _pro += colorize('V ','green')
@@ -39,7 +55,28 @@ def update_prompt(f):
             else:
                 _pro += colorize('P','black')
             VRLui.prompt = colorize(_pro+'>','bold')
-            sys.stdout.flush()
+        else:
+            ans = f(*args, **kw)
+            _pro = colorize('VRL ','')
+            if vul:
+                _pro += colorize('V ','')
+            else :
+                _pro += colorize('_ ','')
+            if exp:
+                _pro += colorize('E ','')
+            else :
+                _pro += colorize('_ ','')
+            if exp:
+                if hasattr(exp, 'default_payload'):
+                    if pay:
+                        _pro += colorize('P','')
+                    else:
+                        _pro += colorize('_','')
+                else :
+                    _pro += colorize('X','')
+            else:
+                _pro += colorize('_','')
+            VRLui.prompt = colorize(_pro+'>','')
         return ans
     return fn
 
@@ -651,10 +688,10 @@ Format: aslr status/check/on/off/conservative'''
         return [i for i in ['status', 'check', 'on', 'off', 'conservative'] if i.startswith(text)]
 
     def do_coloroff(self,line):
-        '''Turn off color'''
-        global colors
-        colors = False
-        self.prompt = 'VRL >'
+        '''Turn off color of prompt'''
+        global prompt_colors
+        prompt_colors = False
+        update_prompt(lambda: None)()
 
     def do_q(self, line):
         '''Quit VRL.'''
@@ -665,24 +702,6 @@ Format: aslr status/check/on/off/conservative'''
             return [i for i in ['exp', 'vul'] if i.startswith(text)]
         else:
             return ['exp', 'vul']
-
-
-
-# list of exp & vul & payload
-exploit_list = []
-vulnerability_list = []
-payload_list = []
-misc_list = []
-
-# exp & vul & payload using
-exp = []        # will be replaced by an Exploit instance.
-vul = []        # will be replaced by a Vulnerability instance.
-pay = ''        # only be replaced by payload data.
-
-# path
-root_path = sys.path[0]         # not change
-exp_path = sys.path[0]          # change to exploit path
-vul_path = sys.path[0]          # change to vulnerability path
 
 VRLui = ui()
 
