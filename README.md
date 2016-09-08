@@ -7,15 +7,12 @@ Ubuntu 16.04 LTS (64 bits)
 
 漏洞程序主要使用 C 或 C++ 编写，对应脚本主要使用 Python 2.7 编写。   
 
-建议安装的Python库：
+可能会用到的 Python 第三方库有:
 
 - [cmd2](https://pythonhosted.org/cmd2/)
+- [pwntools](https://github.com/Gallopsled/pwntools)等
 
-可能会用到的 Python 第三方库有:   
-
-- [pwntools](https://github.com/Gallopsled/pwntools)
-- [capstone](https://github.com/aquynh/capstone)
-- [ropgadget](https://github.com/JonathanSalwan/ROPgadget)
+环境配置参见[环境配置向导](documents/环境配置向导.md)
 
 ## 平台架构
 VRL平台大致分为五个部分。
@@ -96,6 +93,7 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
     + `help`将列出所用命令，`help command`或`?command`将给出帮助。
     + `q`退出VRL
     + `gdb`将调出GDB，这将不会像使用`!gdb`这样让当前终端陷入GDB。
+    + `coloron``coloroff`用于开关命令行颜色
     + 命令不区分大小写，但脚本名区分。
     + 强烈建议安装cmd2，如果你安装了cmd2包，将优先使用cmd2，这将带来如下便利：
         + 可以方便地使用脚本，bash命令和python命令。
