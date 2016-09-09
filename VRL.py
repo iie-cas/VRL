@@ -425,7 +425,7 @@ Mention: run exp/e equals runexp
         if not self._check_before_running(): return
         if exp:
             print 'Exploit Running...'
-            os.chdir(vul_path)
+            os.chdir(exp_path)
             sys.path.append(exp_path)
             exp.run()
             sys.path.remove(exp_path)
