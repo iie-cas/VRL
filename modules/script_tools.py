@@ -29,7 +29,6 @@ def share(key, value):
 
     with open(path, 'w') as f:
         json_data[str(key)] = value
-        print json_data
         json.dump(json_data, f, indent=4)
 
 def clear_share():
@@ -57,11 +56,9 @@ def _check_share_path():
     if not os.path.exists(path[0:-11]):
         os.mkdir(path[0:-11])
     if 'share.json' not in os.listdir(path[0:-11]):
-        with open(path, 'w'):
-            pass
+        os.mknod(path)
 
 def aslr_status():
-    subprocess.PIPE
     p = subprocess.Popen("cat /proc/sys/kernel/randomize_va_space",stdout=subprocess.PIPE,shell= True)
     ans = p.stdout.read()
     return int(ans[0])
