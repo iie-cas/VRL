@@ -39,7 +39,7 @@ Environment : ASLR on; DEP on; PIE off; Architecture: amd64/i386.
             return
         print 'Port: %s  listening > %s' % (self.options['port'], file_name)
         os.system(new_terminal('echo "Running..." && socat TCP4-LISTEN:'+
-                               self.options['port']+'fork EXEC:./'+file_name+',reuseaddr'))
+                               self.options['port']+'fork EXEC:./'+file_name))
 
 #这里之下不要更改---------------------------------------------------------------------------------
 if __name__ == "__main__":
