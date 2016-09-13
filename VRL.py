@@ -9,7 +9,7 @@ except ImportError:
 
 from modules.script_tools import *
 
-# list of exp & vul & payload
+# list of exp & vul & payload   string of name
 exploit_list = []
 vulnerability_list = []
 payload_list = []
