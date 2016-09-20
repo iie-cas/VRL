@@ -32,7 +32,7 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
 ###主要功能
 
 + 状态显示：
-    + 在命令行左端，会显示当前状态。![扩展向导](documents/pic/prompt.jpg)
+    + 在命令行左端，会显示当前状态。![prompt.jpg](documents/pic/prompt.jpg)
     + V表示Vulnerability，E表示Exploit，P表示Payload
     + 灰色表示没有选择，绿色表示已经选择，蓝色表示当前不可用。
 
