@@ -93,12 +93,35 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
     + `help`将列出所用命令，`help command`或`?command`将给出帮助。
     + `q`退出VRL
     + `gdb`将调出GDB，这将不会像使用`!gdb`这样让当前终端陷入GDB。
-    + `coloron``coloroff`用于开关命令行颜色
+    + `coloron` `coloroff`用于开关命令行颜色
     + 命令不区分大小写，但脚本名区分。
     + 强烈建议安装cmd2，如果你安装了cmd2包，将优先使用cmd2，这将带来如下便利：
         + 可以方便地使用脚本，bash命令和python命令。
         + 异常将不会导致退出VRL。
         + 一些默认的函数，例如`exit`, `!command`执行bash指令等。
+
+## 包含模块
+
++ 漏洞和攻击：（默认为64bit）
+    + 栈溢出
+        + 代码注入
+        + Ret2lib
+        + ROP
+        + JOP
+        + ROP开启执行后注入
+    + 堆溢出
+        + 堆溢出导致的任意代码执行
+    + 堆：Double free
+        + Double free导致的任意代码执行（64bit和32bit）
++ Payload
+    + 打开shell
+    + 执行任意shell指令
+    + 执行任意系统调用
+    + Hello World
+    + 输出`passwd`文件
++ 工具
+    + 连接/保存生成payload
+    
 
 
 ## 扩展方法和其他
