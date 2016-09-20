@@ -39,7 +39,7 @@ long long int testVul(int connfd)
 	ans=systemaddr();
 	return ans;*/
 
-        //code reuse jop
+        //code reuse jop, rop, dep
       if(str[0]=='p'){//generate gadget, non-execution
         __asm__("pop %rcx");
         __asm__("pop %rax");
