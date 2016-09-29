@@ -21,6 +21,7 @@ Environment : ASLR on; DEP on; PIE off; Architecture: amd64/i386.
         #这里包括用户可以设置的所有选项和默认值。注意必须为字符串形式，取值时用eval函数。
         #这里与exploit中相同key的值将被同步为exploit的值。
         self.options={'port' : '12345',
+                      'static' : 'False',
                       'architecture' : 'amd64'}
         #这里写出支持的exploit名称，以路径名为准。如有多个可以写为list。
         self.exploit= ['double_free']
@@ -31,7 +32,10 @@ Environment : ASLR on; DEP on; PIE off; Architecture: amd64/i386.
         下面是一个简单的样例。'''
         aslr_on()
         if self.options['architecture'] == 'amd64':
-            file_name = 'heap64'
+            if self.options['static'] == 'False':
+                file_name = 'heap64'
+            else:
+                file_name = 'heap64static'
         elif self.options['architecture'] == 'i386':
             file_name = 'heap32'
         else:

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+char gff;
 char *a[2010];
 int i=2000;
 void Malloc(void);
@@ -14,11 +15,17 @@ int main(void)
 {
 	char c;
 	setbuf(stdout,NULL);
+        gff='a';
+        
 	while (1)
 	{
+                if (gff=='g'){//non-execution
+                  system("/bin/sh");
+               }
 		printf("What is your choice?(m/f/e/p)\n");
 		scanf("%c",&c);
 		getchar();
+                
 		if(c == 'm')
 		{
 			Malloc();
@@ -39,6 +46,7 @@ int main(void)
 		{
 			break;
 		}
+                
 	}
 	printf("end\n");
 }
