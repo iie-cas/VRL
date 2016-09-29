@@ -73,7 +73,7 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
     + `tool toolname` 将调用工具，例如连接payload等。
 
 + 查询和改变ASLR状态
-    + `aslr check` 或`aslr status`：查询当前ASLR状态
+    + `aslr frame_check` 或`aslr status`：查询当前ASLR状态
     + `aslr on`， `aslr off`， `aslr conservative`：改变ASLR状态
 
 + 停止Exploit或Vulnerability：

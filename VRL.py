@@ -21,10 +21,10 @@ exp = []  # will be replaced by an Exploit instance.
 vul = []  # will be replaced by a Vulnerability instance.
 pay = ''  # only be replaced by payload data.
 
-# path
+# inner_path
 root_path = sys.path[0]  # not change
-exp_path = sys.path[0]  # change to exploit path
-vul_path = sys.path[0]  # change to vulnerability path
+exp_path = sys.path[0]  # change to exploit inner_path
+vul_path = sys.path[0]  # change to vulnerability inner_path
 
 # prompt color
 prompt_colors = True
@@ -115,12 +115,7 @@ So you only need to use this when you add something new and do not want to resta
     def do_guide(self, line):
         '''Show a simple guide.'''
         print '''
-        Simple guide:
-        help command or ?[command] for help.
-        show command for list vulnerabilities and exploits.
-        use command for load vulnerabilities and exploits.
-        run command for run vulnerabilities and exploits.
-        For more commands, use help command to list all, or read the document.
+        RTFM
         '''
 
     def do_show(self, type):
@@ -276,7 +271,7 @@ Format: useexp exploit_name'''
         '''Use a payload
 Format: usepay payload_name'''
         global pay
-        # check
+        # frame_check
         if not exp:
             print colorize('[Error]: ', 'red'), 'You should use an exploit before use a payload.'
             return
@@ -676,8 +671,8 @@ Format: attach          attach the vulnerability.
 
     def do_aslr(self, line):
         '''Check status/Turn on/Turn off ASLR of system.
-Format: aslr status/check/on/off/conservative'''
-        if line in ['status', 'check', 'on', 'off', 'conservative']:
+Format: aslr status/frame_check/on/off/conservative'''
+        if line in ['status', 'frame_check', 'on', 'off', 'conservative']:
             if line[1] in ['h', 't']:
                 state = aslr_status()
                 if state == 2:
@@ -700,7 +695,7 @@ Format: aslr status/check/on/off/conservative'''
             self.do_help('aslr')
 
     def complete_aslr(self, text, line, begidx, endidx):
-        return [i for i in ['status', 'check', 'on', 'off', 'conservative'] if i.startswith(text)]
+        return [i for i in ['status', 'frame_check', 'on', 'off', 'conservative'] if i.startswith(text)]
 
     def do_coloroff(self, line):
         '''Turn off color of prompt'''

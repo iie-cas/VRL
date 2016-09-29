@@ -52,7 +52,7 @@ if __name__ == "__main__":
     vul = Vulnerability()
     print 'Vulnerability: ',vul.name,' \n'
     print 'Checking:\n'
-    if vul.check():
+    if vul.frame_check():
         print 'Running:\n'
         vul.run()
 
