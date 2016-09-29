@@ -8,6 +8,7 @@ except ImportError:
     import cmd
 
 from modules.script_tools import *
+from modules.magicfork import magicfork
 
 # list of exp & vul & payload   string of name
 exploit_list = []
@@ -389,36 +390,46 @@ Mention: run exp/e equals runexp
          run vul/v equals runvul'''
         if name in ['exp', 'vul', 'e', 'v']:
             if name in ['exp', 'e']:
-                self.do_runexp('')
+                return self.do_runexp('')
             else:
-                self.do_runvul('')
-            return
+                return self.do_runvul('')
+
         print 'Quick running...'
         if not vul and not exp:
             if not name:
                 print colorize('[Error]: ', 'red'), 'No vulnerability or exploit using. Use one before running.'
                 return
+
         print "Try to run the vulnerability."
-        self.do_runvul('')
+        exit_vul = self.do_runvul('')
         print "Try to run the exploit."
-        self.do_runexp('')
+        exit_exp = self.do_runexp('')
+        return exit_exp or exit_vul
 
     def complete_run(self, text, line, begidx, endidx):
         return self._complete_e_or_v(text, line, begidx, endidx)
 
     def do_runvul(self, line):
         '''Run the vulnerability using'''
-        if not self._check_before_running(): return
+        if not self._check_before_running(): return False
         if vul:
             print 'Vulnerability Running...'
             os.chdir(vul_path)
             sys.path.append(vul_path)
-            vul.run()
+            if hasattr(vul, 'in_new_terminal') and vul.in_new_terminal:
+                if magicfork() == 0:
+                    vul.run()
+                    return True
+                else:
+                    return False
+            else:
+                vul.run()
             sys.path.remove(vul_path)
             os.chdir(root_path)
             print 'Script Finished.'
         else:
             print 'No vulnerability using. Nothing to do.'
+        return False
 
     def do_runexp(self, line):
         '''Run the exploit using'''
