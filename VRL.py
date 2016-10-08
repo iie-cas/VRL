@@ -25,8 +25,6 @@ pay = ''  # only be replaced by payload data.
 
 # inner_path
 root_path = sys.path[0]  # not change
-exp_path = sys.path[0]  # change to exploit inner_path
-vul_path = sys.path[0]  # change to vulnerability inner_path
 
 # prompt color
 prompt_colors = True
@@ -532,8 +530,8 @@ Format: tool name'''
 Format: attach          attach the vulnerability.
         attach  e|exp|v|vul     attach the exploit/vulnerability.'''
         file_pids = []
-        _path = vul_path
-        if line and line[0] == 'e': _path = exp_path
+        _path = vul.frame_path
+        if line and line[0] == 'e': _path = exp.frame_path
 
         for i in find_executable_file(_path):
             _pid = pidof(i)
