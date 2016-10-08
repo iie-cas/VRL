@@ -113,10 +113,10 @@ VRL平台可以分别载入Exploit，Vulnerability和Payload，并修改其设�
         + 堆溢出导致的任意代码执行
     + 堆：Double free
         + Double free导致的任意代码执行（64bit和32bit）
-    + 堆：Use after free
-        + use after free导致的任意代码执行
-    + 格式化字符串
-        + 格式化字符串漏洞导致的任意代码执行
+    + 堆：Use after free
+        + use after free导致的任意代码执行
+    + 格式化字符串
+        + 格式化字符串漏洞导致的任意代码执行
 + Payload
     + 打开shell
     + 执行任意shell指令
