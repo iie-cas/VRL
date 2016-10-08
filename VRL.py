@@ -171,9 +171,7 @@ Format: usevul vulnerability_name'''
             # auto options fixing
             if exp:
                 print '>Exploit exist, auto_sync options(exp->vul).'
-                for _key in vul.options.keys():
-                    if _key in exp.options.keys():
-                        vul.options[_key] = exp.options[_key]
+                vul.frame_set(exp.options)
         except Exception, e:
             print colorize('[Error]: ', 'red'), e
 
@@ -190,9 +188,7 @@ Format: useexp exploit_name'''
             # auto options fixing
             if vul:
                 print '>Vulnerability exist, auto_sync options(exp->vul).'
-                for _key in vul.options.keys():
-                    if _key in exp.options.keys():
-                        vul.options[_key] = exp.options[_key]
+                vul.frame_set(exp.options)
 
             # load default payload
             if hasattr(exp, 'default_payload'):
@@ -462,17 +458,11 @@ Notice: When the vulnerability and exploit share same keys, they will change tog
             return
         suc = False  # found or not
         if vul:
-            for (k, _) in vul.options.items():
-                if k == key:
-                    vul.options[k] = value
-                    print "Vulnerability options updated."
-                    suc = True
+            if vul.frame_set({key: value}):
+                suc = True
         if exp:
-            for (k, _) in exp.options.items():
-                if k == key:
-                    exp.options[k] = value
-                    print "Exploit options updated."
-                    suc = True
+            if exp.frame_set({key: value}):
+                suc = True
         if not suc:
             print colorize('[Error]: ', 'red'), 'No such key found.'
 
@@ -493,15 +483,11 @@ Notice: When the vulnerability and exploit share same keys, they will change tog
     def do_setvul(self, args):
         '''See help set.'''
         [key, value] = args.split(' ')[0:2]
-        suc = False  # found or not
         if vul:
-            for (k, _) in vul.options.items():
-                if k == key:
-                    vul.options[k] = value
-                    print "Vulnerability options updated."
-                    suc = True
-        if not suc:
-            print colorize('[Error]: ', 'red'), 'No such key found.'
+            if not vul.frame_set({key: value}):
+                print colorize('[Error]: ', 'red'), 'No such key found.'
+        else:
+            print colorize('[Error]: ', 'red'), 'No vulnerability using.'
 
     def complete_setvul(self, text, line, begidx, endidx):
         if not vul: return []
@@ -513,13 +499,10 @@ Notice: When the vulnerability and exploit share same keys, they will change tog
         [key, value] = args.split(' ')[0:2]
         suc = False  # found or not
         if exp:
-            for (k, _) in exp.options.items():
-                if k == key:
-                    exp.options[k] = value
-                    print "Exploit options updated."
-                    suc = True
-        if not suc:
-            print colorize('[Error]: ', 'red'), 'No such key found.'
+            if not exp.frame_set({key: value}):
+                print colorize('[Error]: ', 'red'), 'No such key found.'
+        else:
+            print colorize('[Error]: ', 'red'), 'No exploit using.'
 
     def complete_setexp(self, text, line, begidx, endidx):
         if not exp: return []
