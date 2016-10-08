@@ -103,7 +103,7 @@ def print_line(str, padding='='):
     print _str
 
 def find_executable_file(path):
-    '''Return a list of executable file names in the path.'''
+    '''Return a list of executable file names in the inner_path.'''
     import ElfHeader
     lst = []
     for _file in os.listdir(path):
