@@ -9,6 +9,8 @@ except ImportError:
 
 from modules.script_tools import *
 from modules.magicfork import magicfork
+from modules.exploit import VRL_Exploit
+from modules.vulnerability import VRL_Vulnerability
 
 # list of exp & vul & payload   string of name
 exploit_list = []
@@ -37,7 +39,7 @@ class ui(cmd.Cmd):
         @functools.wraps(f)
         def fn(*args, **kw):
             self = args[0]
-            global exp, vul, pay
+            global exp, vul
             if prompt_colors:
                 ans = f(*args, **kw)
                 _pro = colorize('VRL ', 'magenta', prompt=True)
@@ -51,7 +53,7 @@ class ui(cmd.Cmd):
                     _pro += colorize('E ', 'black', prompt=True)
                 if exp:
                     if hasattr(exp, 'default_payload'):
-                        if pay:
+                        if hasattr(exp, 'payload') and exp.payload:
                             _pro += colorize('P', 'green', prompt=True)
                         else:
                             _pro += colorize('P', 'black', prompt=True)
@@ -73,7 +75,7 @@ class ui(cmd.Cmd):
                     _pro += '_ '
                 if exp:
                     if hasattr(exp, 'default_payload'):
-                        if pay:
+                        if hasattr(exp, 'payload') and exp.payload:
                             _pro += 'P'
                         else:
                             _pro += '_'
@@ -162,22 +164,11 @@ Format: show exploit|vulnerabilities|payload|options|tools
     def do_usevul(self, name):
         '''Use a vulnerability
 Format: usevul vulnerability_name'''
-        global vul, vul_path
+        global vul
         try:
-            _temp = __import__('vulnerabilities.' + name + '.run', globals(), locals(), fromlist=['Vulnerability'])
-            Vulnerability = _temp.Vulnerability
-            vul = Vulnerability()
-            print 'Vulnerability Loaded.'
-            vul_path = os.path.join(sys.path[0], 'vulnerabilities', name)
-            self.do_infovul('')
-            if hasattr(vul, 'exploit') and vul.exploit:
-                print_line('Supported Exploits:')
-                if type(vul.exploit) == str:
-                    print vul.exploit
-                elif type(vul.exploit) == list:
-                    for i in vul.exploit:
-                        print i
-                print_line('')
+            vul = VRL_Vulnerability.frame_load(name, root_path)
+
+            # auto options fixing
             if exp:
                 print '>Exploit exist, auto_sync options(exp->vul).'
                 for _key in vul.options.keys():
@@ -193,23 +184,9 @@ Format: usevul vulnerability_name'''
     def do_useexp(self, name):
         '''Use an exploit
 Format: useexp exploit_name'''
-        global exp, exp_path, pay
+        global exp
         try:
-            _temp = __import__('exploits.' + name + '.run', globals(), locals(), fromlist=['Exploit'])
-            Exploit = _temp.Exploit
-            exp = Exploit()
-            print 'Exploit Loaded.'
-            self.do_infoexp('')
-            exp_path = os.path.join(sys.path[0], 'exploits', name)
-            if hasattr(exp, 'vulnerability') and exp.vulnerability:
-                print_line('Supported Vulnerabilities:')
-                if type(exp.vulnerability) == str:
-                    print exp.vulnerability
-                elif type(exp.vulnerability) == list:
-                    for i in exp.vulnerability:
-                        print i
-                print_line('')
-
+            exp = VRL_Exploit.frame_load(name, root_path)
             # auto options fixing
             if vul:
                 print '>Vulnerability exist, auto_sync options(exp->vul).'
@@ -219,47 +196,7 @@ Format: useexp exploit_name'''
 
             # load default payload
             if hasattr(exp, 'default_payload'):
-                if exp.default_payload:
-                    exp.payload = ''
-                    print ">Exploit has a default payload, loading..."
-
-                    # try .json
-                    if exp.default_payload + '.json' in str(os.listdir('./payloads')):
-                        try:
-                            with open('./payloads/' + exp.default_payload + '.json', 'r') as f:
-                                json_data = json.load(f)
-
-                                class _tmp_pay(object):
-                                    info = ''
-                                    data = ''
-
-                                pay = _tmp_pay()
-                                pay.data = eval("str('" + json_data['data'] + "')")  # This is unsafe, and ugly.
-                                exp.payload = pay.data
-                                print ">Default payload: '" + exp.default_payload + "' loaded."
-                        except Exception, e:
-                            print colorize('[Error]:', 'red'), e
-                            return 0
-
-                    # try .py
-                    else:
-                        try:
-                            _temp = __import__('payloads.' + exp.default_payload, globals(), locals(),
-                                               fromlist=['Payload'])
-                            Payload = _temp.Payload
-                            pay = Payload()
-                            exp.payload = pay.data
-                            print ">Default payload: '" + exp.default_payload + "' loaded."
-                        except Exception, e:
-                            print '[Error]: ', e
-                            # print supported payloads
-                if hasattr(exp, 'supported_payload'):
-                    if type(exp.supported_payload) == str:
-                        print exp.supported_payload
-                    elif type(exp.supported_payload) == list:
-                        for i in exp.supported_payload:
-                            print i
-                print_line('')
+                exp.frame_update_payload()
         except Exception, e:
             print colorize('[Error]: ', 'red'), e
 
@@ -409,8 +346,8 @@ Mention: run exp/e equals runexp
         if not self._check_before_running(): return False
         if vul:
             print 'Vulnerability Running...'
-            os.chdir(vul_path)
-            sys.path.append(vul_path)
+            os.chdir(vul.frame_path)
+            sys.path.append(vul.frame_path)
             if hasattr(vul, 'in_new_terminal') and vul.in_new_terminal:
                 if magicfork() == 0:
                     vul.run()
@@ -419,7 +356,7 @@ Mention: run exp/e equals runexp
                     return False
             else:
                 vul.run()
-            sys.path.remove(vul_path)
+            sys.path.remove(vul.frame_path)
             os.chdir(root_path)
             print 'Script Finished.'
         else:
@@ -431,10 +368,17 @@ Mention: run exp/e equals runexp
         if not self._check_before_running(): return
         if exp:
             print 'Exploit Running...'
-            os.chdir(exp_path)
-            sys.path.append(exp_path)
-            exp.run()
-            sys.path.remove(exp_path)
+            os.chdir(exp.frame_path)
+            sys.path.append(exp.frame_path)
+            if hasattr(exp, 'in_new_terminal') and exp.in_new_terminal:
+                if magicfork() == 0:
+                    exp.run()
+                    return True
+                else:
+                    return False
+            else:
+                exp.run()
+            sys.path.remove(exp.frame_path)
             os.chdir(root_path)
             print 'Script Finished.'
         else:
@@ -515,22 +459,14 @@ Notice: make exp/e equals makeexp
     def do_infovul(self, line):
         '''Show the inFormation of current Vulnerability.'''
         if vul:
-            if hasattr(vul, 'info'):
-                print_line('Vulnerability inFormation:')
-                print vul.info
-            else:
-                print colorize('[Error]: ', 'red'), 'This vulnerability has no info.'
+            vul.frame_print_info
         else:
             print colorize('[Error]: ', 'red'), 'No vulnerability using.'
 
     def do_infoexp(self, line):
         '''Show the inFormation of current Exploit.'''
         if exp:
-            if hasattr(exp, 'info'):
-                print_line('Exploit inFormation:')
-                print exp.info
-            else:
-                print colorize('[Error]: ', 'red'), 'This exploit has no info.'
+            exp.frame_print_info()
         else:
             print colorize('[Error]: ', 'red'), 'No exploit using.'
 
