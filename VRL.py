@@ -217,45 +217,7 @@ Format: usepay payload_name'''
                 print colorize('[Error]: ', 'red'), 'Current exploit does not support change payload.'
                 return
         # load payload
-        # try .json first
-        if name + '.json' in str(os.listdir('./payloads')):
-            try:
-                with open('./payloads/' + name + '.json', 'r') as f:
-                    json_data = json.load(f)
-
-                    class _tmp_pay(object):
-                        info = ''
-                        data = ''
-
-                    pay = _tmp_pay()
-                    pay.info = json_data['info']
-                    pay.data = eval("str('" + json_data['data'] + "')")  # This is unsafe, and ugly.
-                    print ">Payload info:"
-                    print pay.info  # who can tell me a better way? by author
-                    c = raw_input("Are you sure to use the payload?(y/n):(y)")
-                    if not c or c[0] != 'n':
-                        exp.payload = pay.data
-                    print "New payload loaded."
-            except Exception, e:
-                print colorize('[Error]: ', 'red'), e
-            finally:
-                return
-
-        # try .py
-        try:
-            _temp = __import__('payloads.' + name, globals(), locals(), fromlist=['Payload'])
-            Payload = _temp.Payload
-            pay = Payload()
-            print 'Payload Loaded.'
-            if hasattr(exp, 'payload_requirement'):
-                print '>Payload requirements of the exploit:\n', exp.payload_requirement
-
-            c = raw_input(">Payload info:\n" + pay.info + "\nAre you sure to use the payload?(y/n):(y)")
-            if not c or c[0] != 'n':
-                exp.payload = pay.data
-            print "New payload loaded."
-        except Exception, e:
-            print colorize('[Error]: ', 'red'), e
+        exp.frame_update_payload(name, root_path, need_confirm=True)
 
     def complete_usepay(self, text, line, begidx, endidx):
         return [i for i in payload_list if i.startswith(text)]
