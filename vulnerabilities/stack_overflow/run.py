@@ -37,7 +37,10 @@ Author : guoyingjie'''
                 else:
                     p = os.popen(new_terminal('./ggteststatic_stacknoexe '+self.options['port']),'r')
         elif self.options['architecture'] == 'i386':
-            p = os.popen(new_terminal('./code_reuse32 '+self.options['port']),'r')
+            if self.options['static'] == 'False':
+                p = os.popen(new_terminal('./code_reuse32 '+self.options['port']),'r')
+            else:
+                print 'Not supported: i386 & static.'
         else:
             print 'Unrecognized architecture, stop.'
             return
