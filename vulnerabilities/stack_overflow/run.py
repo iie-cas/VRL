@@ -17,6 +17,7 @@ Author : guoyingjie'''
                 'aslr': 'off',
                 'allow_stack_exec' : 'True',
                 'static' : 'False',
+                'architecture' : 'i386',#'amd64',
                 'port' : '34567'}
         self.exploit = ['code_injection', 'borrow_code_chunks', 'rop', 'jop', 'rop_shellcode']
 
@@ -24,16 +25,22 @@ Author : guoyingjie'''
         aslr_off()
         '''Run your vulnerability here, if this script could success, the VRL can run it.
         When the vulnerability run, follow the options.'''
-        if self.options['static'] == 'False':
-            if eval(self.options['allow_stack_exec']):
-                p = os.popen(new_terminal('./code_injection '+self.options['port']),'r')
+        if self.options['architecture'] == 'amd64':
+            if self.options['static'] == 'False':
+                if eval(self.options['allow_stack_exec']):
+                    p = os.popen(new_terminal('./code_injection '+self.options['port']),'r')
+                else:
+                    p = os.popen(new_terminal('./code_reuse '+self.options['port']),'r')
             else:
-                p = os.popen(new_terminal('./code_reuse '+self.options['port']),'r')
+                if eval(self.options['allow_stack_exec']):
+                    p = os.popen(new_terminal('./ggteststatic '+self.options['port']),'r')
+                else:
+                    p = os.popen(new_terminal('./ggteststatic_stacknoexe '+self.options['port']),'r')
+        elif self.options['architecture'] == 'i386':
+            p = os.popen(new_terminal('./code_reuse32 '+self.options['port']),'r')
         else:
-            if eval(self.options['allow_stack_exec']):
-                p = os.popen(new_terminal('./ggteststatic '+self.options['port']),'r')
-            else:
-                p = os.popen(new_terminal('./ggteststatic_stacknoexe '+self.options['port']),'r')
+            print 'Unrecognized architecture, stop.'
+            return
 '''Bellowing is default, simply ignore it.'''
 if __name__ == "__main__":
     if '__init__.py' not in os.listdir(os.curdir):
