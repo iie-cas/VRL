@@ -17,7 +17,7 @@ Author : guoyingjie'''
                 'aslr': 'off',
                 'allow_stack_exec' : 'True',
                 'static' : 'False',
-                'architecture' : 'i386',#'amd64',
+                'architecture' : 'amd64',#'i386',
                 'port' : '34567'}
         self.exploit = ['code_injection', 'borrow_code_chunks', 'rop', 'jop', 'rop_shellcode']
 

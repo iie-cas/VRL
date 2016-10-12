@@ -2,6 +2,8 @@
 # coding:utf-8
 import functools
 
+import time
+
 try:
     import cmd2 as cmd
 except ImportError:
@@ -290,6 +292,7 @@ Mention: run exp/e equals runexp
 
         print "Try to run the vulnerability."
         exit_vul = self.do_runvul('')
+        time.sleep(1)
         print "Try to run the exploit."
         exit_exp = self.do_runexp('')
         return exit_exp or exit_vul
