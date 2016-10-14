@@ -17,7 +17,7 @@ Author : guoyingjie'''
                 'aslr': 'off',
                 'allow_stack_exec' : 'True',
                 'static' : 'False',
-                'architecture' : 'i386',#'amd64',
+                'architecture' : 'amd64',
                 'port' : '34567'}
         self.exploit = ['code_injection', 'borrow_code_chunks', 'rop', 'jop', 'rop_shellcode']
 
@@ -37,7 +37,11 @@ Author : guoyingjie'''
                 else:
                     p = os.popen(new_terminal('./ggteststatic_stacknoexe '+self.options['port']),'r')
         elif self.options['architecture'] == 'i386':
-            p = os.popen(new_terminal('./code_reuse32 '+self.options['port']),'r')
+            if self.options['static'] == 'False':
+                p = os.popen(new_terminal('./code_reuse32 '+self.options['port']),'r')
+            else:
+                print 'static'
+                p = os.popen(new_terminal('./code_reuse32_static '+self.options['port']),'r')
         else:
             print 'Unrecognized architecture, stop.'
             return
