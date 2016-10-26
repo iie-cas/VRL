@@ -14,7 +14,7 @@ class Vulnerability(vulnerability.VRL_Vulnerability):
         #这里的信息用于使用这一vulnerability显示给用户的信息。这里的名字可以写全称。格式请保持这种风格。尽量详尽。
         self.info = \
 '''Vulnerability Name : heap
-Vulnerability abstract : 堆漏洞，包括堆溢出，Double free和Use after free。
+Vulnerability abstract : 堆漏洞，包括堆溢出，Double free。
 Author : Lijinfeng
 Environment : ASLR on; DEP on; PIE off; Architecture: amd64/i386.
 '''
@@ -24,7 +24,7 @@ Environment : ASLR on; DEP on; PIE off; Architecture: amd64/i386.
                       'static' : 'False',
                       'architecture' : 'amd64'}
         #这里写出支持的exploit名称，以路径名为准。如有多个可以写为list。
-        self.exploit= ['double_free']
+        self.exploit= ['double_free', 'heap_overflow']
 
     def run(self):
         '''在这里运行你的程序，你可以单独运行这一脚本，会自动帮你运行。如果这里运行成功，那么VRL就可以调用你的脚本了。
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     vul = Vulnerability()
     print 'Vulnerability: ',vul.name,' \n'
     print 'Checking:\n'
-    if vul.check():
+    if vul.frame_check():
         print 'Running:\n'
         vul.run()
 

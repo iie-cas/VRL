@@ -17,7 +17,7 @@ Author : guoyingjie'''
                 'aslr': 'off',
                 'allow_stack_exec' : 'True',
                 'static' : 'False',
-                'architecture' : 'amd64',
+                'architecture' : 'amd64',#'i386',
                 'port' : '34567'}
         self.exploit = ['code_injection', 'borrow_code_chunks', 'rop', 'jop', 'rop_shellcode']
 
@@ -40,7 +40,6 @@ Author : guoyingjie'''
             if self.options['static'] == 'False':
                 p = os.popen(new_terminal('./code_reuse32 '+self.options['port']),'r')
             else:
-                print 'static'
                 p = os.popen(new_terminal('./code_reuse32_static '+self.options['port']),'r')
         else:
             print 'Unrecognized architecture, stop.'
@@ -52,7 +51,7 @@ if __name__ == "__main__":
     vul = Vulnerability()
     print 'Vulnerability: ',vul.name,' \n'
     print 'Checking:\n'
-    if vul.check():
+    if vul.frame_check():
         print 'Running:\n'
         vul.run()
 
