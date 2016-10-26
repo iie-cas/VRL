@@ -40,7 +40,7 @@ Author : guoyingjie'''
             if self.options['static'] == 'False':
                 p = os.popen(new_terminal('./code_reuse32 '+self.options['port']),'r')
             else:
-                print 'Not supported: i386 & static.'
+                p = os.popen(new_terminal('./code_reuse32_static '+self.options['port']),'r')
         else:
             print 'Unrecognized architecture, stop.'
             return
