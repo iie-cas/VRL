@@ -310,6 +310,7 @@ Mention: run exp/e equals runexp
             if hasattr(vul, 'in_new_terminal') and vul.in_new_terminal:
                 if magicfork() == 0:
                     vul.run()
+                    self.do_q('')
                     return True
                 else:
                     return False
@@ -332,6 +333,7 @@ Mention: run exp/e equals runexp
             if hasattr(exp, 'in_new_terminal') and exp.in_new_terminal:
                 if magicfork() == 0:
                     exp.run()
+                    self.do_q('')
                     return True
                 else:
                     return False
