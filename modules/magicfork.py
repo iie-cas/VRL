@@ -15,7 +15,7 @@ def magicfork(terminal='gnome'):
         return _fork
     else:
         if terminal in ['gnome', 'gnome-terminal']:
-            bash_exec = "gnome-terminal -e \"bash -c 'mkfifo tmp; tty>tmp; exec sleep 99999999'\";  cat tmp; rm tmp"
+            bash_exec = "gnome-terminal -e \"bash -c 'mkfifo tmp; tty>tmp; exec sleep 99999999'\";  sleep 1; cat tmp; rm tmp"
         elif terminal == 'xterm':
             bash_exec = "xterm -e 'tty >&3; exec sleep 99999999' 3>&1"
         else:
